@@ -50,6 +50,10 @@ Sometimes you need to include the same bit of content in many places on your sit
 
 == Changelog ==
 
+= 1.3.3 =
+* Fix the TinyMCE icon
+* Allow for non-associative arrays on select and radio elements
+
 = 1.3.1 =
 * First official release.
 
