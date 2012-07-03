@@ -25,7 +25,7 @@ require_once('../../../../wp-load.php');
 			  case 'tailored_tools':
 				var c = cm.createSplitButton('TailoredTools', {
 					title : 'Tailored Tools',
-					image : '<?php echo $TailoredTinyMCE->plugin_url; ?>mce-icon.gif',
+					image : '<?php echo $TailoredTinyMCE->plugin_url; ?>resource/mce-icon.gif',
 					onclick : function() {
 						c.showMenu();
 					}

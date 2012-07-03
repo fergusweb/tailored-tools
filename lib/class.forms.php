@@ -409,9 +409,13 @@ abstract class TailoredForm {
 	}
 	
 	function draw_select($key, $q) {
+		// Is this an associative array?
+		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
+		// Draw Element
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<select name="'.$key.'" id="'.$key.'" class="txt">'."\n";
 		foreach ($q['options'] as $val => $opt) {
+			if (!$is_assoc)	$val = $opt;
 			$sel = ($_POST[$key] == $val) ? ' selected="selected"' : '';
 			echo "\t\t".'<option value="'.$val.'"'.$sel.'>'.$opt.'</option>'."\n";
 		}
@@ -423,9 +427,12 @@ abstract class TailoredForm {
 		if ($q['type'] != 'checkbox')	$q['type'] = 'radio';
 		$name = ($q['type'] == 'checkbox') ? $key.'[]' : $key;
 		if ($q['label'])	$q['label'] = '<span class="label">'.$q['label'].'</span>';
+		// Is this an associative array?
+		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
 		// Draw Element
 		echo '<p'.$q['class'].'>'.$q['label']."\n";
 		foreach ($q['options'] as $val => $opt) {
+			if (!$is_assoc)	$val = $opt;
 			$sel = ($_POST[$key] == $val || @in_array($val, $_POST[$key])) ? ' checked="checked"' : '';
 			echo "\t".'<label><input type="'.$q['type'].'" name="'.$name.'" value="'.$val.'"'.$sel.' /> '.$opt.'</label>'."\n";
 		}
