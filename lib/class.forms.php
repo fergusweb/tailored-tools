@@ -72,7 +72,7 @@ abstract class TailoredForm {
 		add_action('wp_enqueue_scripts', array(&$this,'enqueue_scripts'));
 		add_action('template_redirect', array(&$this,'process_form'));
 		add_shortcode($this->shortcode, array(&$this,'handle_shortcode'));
-		add_filter('ttools_form_filter_email_headers', array(&$this,'filter_headers'));
+		add_filter('ttools_form_filter_email_headers', array(&$this,'filter_headers'), 10, 2);
 		// In case we need to tie-in with a particular form
 		add_action('wp_print_footer_scripts ', array(&$this,'print_footer_scripts'));
 		// TinyMCE Button

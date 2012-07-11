@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.4.1
-Stable tag:			1.3.3
+Stable tag:			1.3.4
 
 Contains some helper classes to help you build custom forms.
 
@@ -49,6 +49,10 @@ Sometimes you need to include the same bit of content in many places on your sit
 
 
 == Changelog ==
+
+= 1.3.4 =
+* Fix to apply 'required' class to datepicker elements
+* Fix the email header filter
 
 = 1.3.3 =
 * Fix the TinyMCE icon
