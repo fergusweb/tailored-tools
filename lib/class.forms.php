@@ -18,6 +18,7 @@ abstract class TailoredForm {
 	public		$avail_ayah		= true;
 	// Customise these in child-class
 	public		$nonce			= 'tailored-tools';
+	public		$admin_menu		= 'index.php';	// parent-hook for add_menu_item
 	public		$form_name		= false;
 	public		$questions		= false;	// Will be an array of questions.  See docs for sample.
 	public		$option_key		= 'ttools_option_key';
@@ -491,7 +492,7 @@ abstract class TailoredForm {
 			$count = wp_count_posts( $this->log_type );
 			if ($count && $count->private>0)	$counter = '<span class="update-plugins"><span class="update-count">'. $count->private .'</span></span>';
 		}
-		$hook = add_submenu_page('index.php', $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array(&$this,'admin_page'));
+		$hook = add_submenu_page($this->admin_menu, $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array(&$this,'admin_page'));
 		add_action("load-$hook", array(&$this,'admin_enqueue'));
 	}
 	

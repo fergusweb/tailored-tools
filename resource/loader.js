@@ -24,8 +24,8 @@ jQuery(function($) {
  */
 var tab_counter = 0;
 jQuery(document).ready(function($) {
-	if ($('.format_text .ui_tabs').size() < 1) { return; }
-	$('.format_text .ui_tabs').each(function(i, tabset) {
+	if ($('.ui_tabs').size() < 1) { return; }
+	$('.ui_tabs').each(function(i, tabset) {
 		var ul = $( document.createElement('ul') );
 		//var ul = $('ul');
 		$(tabset).find('.tab_panel').each(function() {

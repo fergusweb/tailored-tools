@@ -49,6 +49,9 @@ class TailoredTools_Shortcodes {
 		$content .= '</div>'."\n";
 		// Using do_shortcode() to apply shortcodes inside the tabs
 		$content = '<div class="ui_tabs">'."\n".do_shortcode($content)."\n".'</div>'."\n";
+		// Add JS
+		wp_enqueue_script('jquery-ui-tabs');
+		// Return
 		return $content;
 	}
 	

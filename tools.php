@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.
-Version:		1.3.3
+Version:		1.3.5
 Author:			Tailored Web Services
 Author URI:		http://www.tailored.com.au
 */
@@ -25,6 +25,8 @@ if (!class_exists('ContactForm'))		require( dirname(__FILE__).'/form.contact.php
 
 //	Sample Form
 //if (!class_exists('SampleForm')		require( dirname(__FILE__).'/form.sample.php' );
+
+
 
 
 
