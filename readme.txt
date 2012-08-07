@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.4.1
-Stable tag:			1.3.5
+Stable tag:			1.3.6
 
 Contains some helper classes to help you build custom forms.
 
@@ -49,6 +49,9 @@ Sometimes you need to include the same bit of content in many places on your sit
 
 
 == Changelog ==
+
+= 1.3.6 =
+* Fix a PHP depreciation issue
 
 = 1.3.5 =
 * Fix issue with ui_tabs - JS and shortcode

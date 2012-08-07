@@ -201,7 +201,7 @@ abstract class TailoredForm {
 		$message = $this->build_message($formdata);
 		
 		// Prepare email headers - how do we know which?
-		$headers = apply_filters('ttools_form_filter_email_headers', false, &$this);
+		$headers = apply_filters('ttools_form_filter_email_headers', false, $this);
 		if (!empty($this->opts['email']['bcc']))	$headers[] = 'BCC: '.$this->opts['email']['bcc'];
 		
 		// Debugging
@@ -227,7 +227,7 @@ abstract class TailoredForm {
 	function process_form_prepare_data() {
 		// Fields to ignore
 		$ignore_fields = array( $this->submit_key, 'recaptcha_challenge_field', 'recaptcha_response_field' );
-		$ignore_fields = apply_filters('ttools_form_filter_validate', $ignore_fields, &$this);
+		$ignore_fields = apply_filters('ttools_form_filter_validate', $ignore_fields, $this);
 		// Prepare data from $_POST
 		$formdata = array();
 		foreach ($_POST as $key => $val) {
@@ -321,9 +321,9 @@ abstract class TailoredForm {
 		}
 		$enctype = (!$this->form_enctype) ? '' : ' enctype="'.$this->form_enctype.'"';
 		// Draw form
-		do_action('ttools_form_before_form', &$this);
+		do_action('ttools_form_before_form', $this);
 		echo '<form action="'.$this->form_action.'" method="post" class="tws '.$this->form_class.'"'.$enctype.'>'."\n";
-		do_action('ttools_form_before_questions', &$this);
+		do_action('ttools_form_before_questions', $this);
 		foreach ($this->questions as $key => $q) {
 			
 			if ($q['type'] == 'fieldset') {
@@ -333,13 +333,13 @@ abstract class TailoredForm {
 			// Draw the field element/wrapper
 			$this->draw_element($key, $q);
 		}
-		do_action('ttools_form_before_submit_button', &$this);
+		do_action('ttools_form_before_submit_button', $this);
 		// Submit button
 		echo '<input type="hidden" name="'.$this->submit_key.'" value="" />'."\n";
 		echo '<p class="submit"><input type="submit" name="'.$this->submit_key.'" value="'.$this->submit_label.'" /></p>'."\n";
-		do_action('ttools_form_after_submit_button', &$this);
+		do_action('ttools_form_after_submit_button', $this);
 		echo '</form>'."\n";
-		do_action('ttools_form_after_form', &$this);
+		do_action('ttools_form_after_form', $this);
 	}
 	
 	function draw_fieldset($id, $fieldset) {
