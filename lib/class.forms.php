@@ -227,7 +227,7 @@ abstract class TailoredForm {
 	function process_form_prepare_data() {
 		// Fields to ignore
 		$ignore_fields = array( $this->submit_key, 'recaptcha_challenge_field', 'recaptcha_response_field' );
-		$ignore_fields = apply_filters('ttools_form_filter_validate', $ignore_fields, $this);
+		$ignore_fields = apply_filters('ttools_form_filter_ignore_fields', $ignore_fields, $this);
 		// Prepare data from $_POST
 		$formdata = array();
 		foreach ($_POST as $key => $val) {

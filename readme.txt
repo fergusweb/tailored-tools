@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.4.1
-Stable tag:			1.3.6
+Stable tag:			1.3.7
 
 Contains some helper classes to help you build custom forms.
 
@@ -47,8 +47,16 @@ This will apply formatting and javascript to implement [jQuery UI Tabs](http://j
 
 Sometimes you need to include the same bit of content in many places on your site.  To save time, this shortcode will let you include the content from one page in many places.  Just use the shortcode, and provide the ID of the page you want to include.  Eg, [pagecontent id="3"] will insert all content from the page with ID = 3.  You can use [pagecontent id="3" include_title="no"] if you want to include the text only, and not the page title.
 
+= [googlemap address="123 somewhere street, Kansas"] =
+
+To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.
+
 
 == Changelog ==
+
+= 1.3.7 =
+* Add a shortcode for [googlemap]
+* Fix a filter name typo for ttools_form_filter_ignore_fields
 
 = 1.3.6 =
 * Fix a PHP depreciation issue
