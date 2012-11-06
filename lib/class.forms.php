@@ -9,18 +9,19 @@
 abstract class TailoredForm {
 	public		$form_action	= false;
 	public		$form_class		= false;
-	public		$form_enctype	= false;	// If uploads: 'multipart/form-data';
+	public		$form_enctype	= false;			// If uploads, change to: 'multipart/form-data';
 	public	$error, $success	= false;
 	public		$debug			= false;
 	// Which anti-spam modules are available?
 	public		$avail_recaptcha= true;
 	public		$avail_akismet	= false;
 	public		$avail_ayah		= true;
+	public		$check_bad_words= false;			// Turn this on child-classes to enable check.
 	// Customise these in child-class
 	public		$nonce			= 'tailored-tools';
-	public		$admin_menu		= 'index.php';	// parent-hook for add_menu_item
+	public		$admin_menu		= 'index.php';		// parent-hook for add_menu_item
 	public		$form_name		= false;
-	public		$questions		= false;	// Will be an array of questions.  See docs for sample.
+	public		$questions		= false;			// Will be an array of questions.  See docs for sample.
 	public		$option_key		= 'ttools_option_key';
 	public		$shortcode		= 'FormShortcode';
 	public		$log_type		= false;			// False to disable logging, or post-type
@@ -78,7 +79,10 @@ abstract class TailoredForm {
 		add_action('wp_print_footer_scripts ', array(&$this,'print_footer_scripts'));
 		// TinyMCE Button
 		add_filter('tailored_tools_mce_buttons', array(&$this,'add_mce_button'));
+		// Build bad-words array
+		add_filter('ttools_form_bad_words_to_check', array(&$this,'filter_bad_words_to_check'), 10, 2);
 	}
+
 	
 	
 	/**
@@ -269,6 +273,8 @@ abstract class TailoredForm {
 		}
 		// Filter, so modules can apply validation per-form
 		$this->error = apply_filters('ttools_form_filter_validate', $this->error, $this);
+		// Now check for bad words?
+		$this->validate_bad_words();
 		// Return true or false
 		return (empty($this->error)) ? true : false;
 	}
@@ -283,6 +289,40 @@ abstract class TailoredForm {
 			if (!isset($_FILES[$key]) || $_FILES[$key]['error'] != '0')	$this->error[] = $q['error'];
 		}
 		
+	}
+	
+	function validate_bad_words() {
+		// Only run if flag enabled.
+		if (!$this->check_bad_words)	return;
+		// Fetch our array of bad words
+		$bad_words = apply_filters('ttools_form_bad_words_to_check', false, $this);
+		// Build a string of the entire form contents
+		$merged = '';	 foreach ($_POST as $key => $val) 	{	$merged .= $val.' '; 	}
+		// Check each of our bad words against the merged string.
+		foreach ($bad_words as $badword) {
+			if (stripos($merged, $badword)) {
+				$this->error[] = 'Your message has tripped our spam filter.  Please double check your message, and avoid suspect words like "viagra".';
+				break;
+			}
+		}
+	}
+	
+	
+	
+	/**
+	 *	Array of bad-words to check for.  If the form contains a bad word, we reject it as spam.
+	 *	Fetch with:		$badwords = apply_filters('ttools_form_bad_words_to_check', false, $this);
+	 */
+	function filter_bad_words_to_check($badwords=false, $form=false) {
+		if ($this->form_name != $form->form_name)	return $badwords;
+		if (!is_array($badwords))					$badwords = array();
+		// Add words to existing array
+		$badwords = array_merge($badwords, array(
+			'ambien', 'cialis', 'buycialis', 'hydrocodone', 'viagraonline', 'cialisonline', 'phentermine', 'viagrabuy', 'percocet', 'tramadol',
+			'propecia', 'xenical', 'meridia', 'levitra', 'vicodin', 'viagra', 'valium', 'porno', 'xanax', 'href=', // 'sex', 'soma'
+		));
+		$badwords = array_unique($badwords);
+		return $badwords;
 	}
 	
 	

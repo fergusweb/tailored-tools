@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.4.1
-Stable tag:			1.3.7
+Stable tag:			1.3.9
 
 Contains some helper classes to help you build custom forms.
 
@@ -37,7 +37,7 @@ The plugin contains two forms: a contact form, and a sample form.  Have a look a
 
 == Shortcodes ==
 
-This plugin also includes two shortcodes that we tend to use a lot.
+This plugin also includes some shortcodes that we tend to use a lot.
 
 = [tabs] =
 
@@ -54,6 +54,14 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Changelog ==
 
+= 1.3.8 =
+* Add a filter for ttools_form_bad_words_to_check to build a blacklist of words to ban
+* If one of those words is in the message, it immediately fails. (Spam check)
+
+= 1.3.8 =
+* Change default message to include the current page URI
+* Add a filter for ttools_form_filter_email_message
+
 = 1.3.7 =
 * Add a shortcode for [googlemap]
 * Fix a filter name typo for ttools_form_filter_ignore_fields
@@ -63,7 +71,7 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 = 1.3.5 =
 * Fix issue with ui_tabs - JS and shortcode
-* Added some more filters for better
+* Added some more filters for easier development
 
 = 1.3.4 =
 * Fix to apply 'required' class to datepicker elements

@@ -22,6 +22,7 @@ class ContactForm extends TailoredForm {
 	public		$avail_akismet	= true;
 	public		$avail_ayah		= true;
 	
+	
 	/**
 	 *	Constructor
 	 */
@@ -29,6 +30,7 @@ class ContactForm extends TailoredForm {
 		$this->load_questions();
 		$this->init();
 	}
+	
 	
 	/**
 	 *	Register our button for TinyMCE to add our shortcode

@@ -17,7 +17,11 @@ class SampleForm extends TailoredForm {
 	public		$submit_key		= 'submit_sample_form';
 	public		$submit_label	= 'Submit Form';
 	public		$form_class		= 'test class';
-
+	// Which anti-spam modules are available?
+	public		$avail_recaptcha= true;
+	public		$avail_akismet	= false;
+	public		$avail_ayah		= true;
+	public		$check_bad_words= false;
 	
 	/**
 	 *	Constructor
