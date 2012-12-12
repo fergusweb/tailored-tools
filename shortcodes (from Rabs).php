@@ -13,6 +13,7 @@ class TailoredTools_Shortcodes {
 	function __construct() {
 		add_shortcode('tabs', array(&$this,'shortcode_ui_tabs'));
 		add_shortcode('pagecontent', array(&$this,'shortcode_pagecontent'));
+		add_shortcode('googlemap', array(&$this,'shortcode_googlemap_iframe'));
 		add_filter('tailored_tools_mce_buttons', array(&$this,'add_mce_buttons'));
 	}
 	
@@ -79,7 +80,25 @@ class TailoredTools_Shortcodes {
 		return ob_get_clean();
 	}
 	
-
+	/**
+	 *	Shortcode to embed a Google Map iframe
+	 */
+	function shortcode_googlemap_iframe($atts=false) {
+		$atts = shortcode_atts(array(
+			'address'	=> false,
+			'class'		=> 'googlemap',
+			'width'		=> 500,
+			'height'	=> 350,
+			'zoom'		=> 16,
+		), $atts);
+		if (!$atts['address'])	return '';
+		ob_start();
+		$address_url = 'http://maps.google.com.au/maps?f=q&source=s_q&hl=en&t=m&output=embed&z='.$atts['zoom'].'&q='.urlencode($atts['address']);
+		?>
+<iframe class="<?php echo $atts['class']; ?>" width="<?php echo $atts['width']; ?>" height="<?php echo $atts['height']; ?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $address_url; ?>"></iframe>
+		<?php
+		return ob_get_clean();
+	}
 
 }
 

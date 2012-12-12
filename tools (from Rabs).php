@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.
-Version:		1.4.0
+Version:		1.3.9
 Author:			Tailored Web Services
 Author URI:		http://www.tailored.com.au
 */
@@ -14,7 +14,6 @@ Author URI:		http://www.tailored.com.au
 if (!class_exists('TailoredTinyMCE'))			require( dirname(__FILE__).'/lib/tinymce.php' );
 if (!class_exists('TailoredForm'))				require( dirname(__FILE__).'/lib/class.forms.php' );
 if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/shortcodes.php' );
-if (!class_exists('TailoredTools_GoogleMaps'))	require( dirname(__FILE__).'/googlemaps.php' );
 
 // Anti-spam Modules
 if (!class_exists('Tailored_reCAPTCHA'))		require( dirname(__FILE__).'/lib/class.recaptcha.php' );

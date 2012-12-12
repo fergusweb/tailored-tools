@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.5
-Stable tag:			1.4.0
+Tested up to:		3.4.1
+Stable tag:			1.3.9
 
 Contains some helper classes to help you build custom forms.
 
@@ -13,7 +13,7 @@ This plugin contains helper classes used to build custom forms.  It's built by [
 
 This plugin comes with a basic contact form. You can write additional plugins to extend & create more forms. If you are not comfortable writing PHP code, then this plugin is probably not right for you.
 
-It also contains some other shortcode helpers for Google Maps, jQuery UI Tabs, and Page Content.
+It also contains two other shortcode helpers.
 
 == Installation ==
 
@@ -49,14 +49,10 @@ Sometimes you need to include the same bit of content in many places on your sit
 
 = [googlemap address="123 somewhere street, Kansas"] =
 
-To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.  This will embed both the iFrame and a static image.  Use CSS to determine which one is shown.  Use CSS media queries for responsive behavior here.
+To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.
 
 
 == Changelog ==
-
-= 1.4.0 =
-* Modify the GoogleMaps shortcode for better responsive behavior.  Now uses Google Static Maps API to grab a JPG before embedding an iFrame.
-* Note: your theme will need some additional CSS to take advantage of these features.
 
 = 1.3.8 =
 * Add a filter for ttools_form_bad_words_to_check to build a blacklist of words to ban
