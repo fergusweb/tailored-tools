@@ -46,6 +46,9 @@ abstract class TailoredForm {
 		if (!$this->avail_akismet)		$this->opts['akismet']['use'] = false;
 		if (!$this->avail_ayah)			$this->opts['ayah']['use'] = false;
 		
+		// Load akismet API key if one not already specified
+		if (empty($this->opts['akismet']['api_key']))	$this->opts['akismet']['api_key'] = get_option('wordpress_api_key');
+		
 		return $this->opts;
 	}
 	function save_options($options = false) {
@@ -129,7 +132,9 @@ abstract class TailoredForm {
 	/**
 	 *	Filter to generate email headers
 	 */
-	function filter_headers($headers=false) {
+	function filter_headers($headers=false, $form=false) {
+		// Only run for specific form
+		if ($this->form_name !== $form->form_name)	return $headers;
 		// By default, we send "from" the WordPress blog & admin email.
 		// Over-ride this function to send from customer details.
 		$headers = array(

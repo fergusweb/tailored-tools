@@ -40,7 +40,6 @@ class Tailored_Akismet {
 	 */
 	function filter_form_validate_error($errors, $form) {
 		if (!$this->check_in_use($form->opts))	return $errors;
-		
 		// Expecting array of (name=>, email=>, message=>) back.
 		$values = apply_filters( 'ttools_map_akismet_fields', array() );
 		
@@ -74,10 +73,10 @@ class Tailored_Akismet {
 	 */
 	function check_key($api_key=false) {
 		$key = 'akismet_api_key_valid_'.$api_key;
-		//delete_transient( $key );
-		if (false === ($valid = get_transient($key) )) {
+		$valid = get_transient($key);
+		if (!is_string($valid)) {
 			$is_valid = $this->remote_check_key($api_key);
-			set_transient($key, (($is_valid) ? 'valid' : 'invalid'), 60*60*24);	// Good for 24 hours.
+			set_transient($key, (($is_valid) ? 'valid' : 'invalid'), 60*60*12);	// Good for 12 hours.
 			$valid = get_transient($key);
 		}
 		return ($valid == 'valid') ? true : false;
@@ -89,12 +88,13 @@ class Tailored_Akismet {
 			'httpversion'	=> '1.0',
 			'timeout'		=> 10
 		);
+//		echo '<p>Checking key: '.$akismet_url.'</p><pre>'; print_r($http_args); echo '</pre>';
 		$response = wp_remote_post( $akismet_url, $http_args );
 		if (is_wp_error( $response )) {
 			wp_die( '<pre>'.print_r($response,true).'</pre>' );
 		}
 		$body = wp_remote_retrieve_body($response);
-		if ($body == 'valid') {
+		if (trim($body) == 'valid') {
 			return true;
 		} else {
 			$this->error_message = 'Akismet API Key is Invalid!';
@@ -121,6 +121,7 @@ class Tailored_Akismet {
 			'url'		=> $url,
 			'message'	=> $message,
 		));
+//echo '<p>Checking form with Akismet:</p><pre>'; print_r($form); echo '</pre>';
 		$http_args = array(
 			'httpversion'	=> '1.0',
 			'timeout'		=> 10,

@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.5
-Stable tag:			1.4.0
+Tested up to:		3.5.1
+Stable tag:			1.4.1
 
 Contains some helper classes to help you build custom forms.
 
