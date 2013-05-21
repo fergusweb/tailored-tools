@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.5.1
-Stable tag:			1.5.0
+Stable tag:			1.5.1
 
 Contains some helper classes to help you build custom forms.
 
@@ -54,7 +54,10 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Changelog ==
 
-= 1.5.0=
+= 1.5.1 =
+* Fix a formatting error in readme file that was really annoying
+
+= 1.5.0 =
 * Double-checked some Akismet code
 * Rewrote style rules for better compatibility with Genesis responsive designs (likely have negative effect on existing sites)
 * Improvde the Datepicker autloader, and add an icon
