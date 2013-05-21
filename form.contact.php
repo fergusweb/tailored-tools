@@ -21,6 +21,7 @@ class ContactForm extends TailoredForm {
 	public		$avail_recaptcha= true;
 	public		$avail_akismet	= true;
 	public		$avail_ayah		= true;
+	public		$check_bad_words= true;
 	
 	
 	/**
@@ -96,7 +97,6 @@ class ContactForm extends TailoredForm {
 				'type'		=> 'text',
 				'required'	=> true,
 				'error'		=> 'Please provide your name',
-				'class'		=> 'testclass',
 			),
 			'cust_email'	=> array(
 				'label'		=> 'Email Address',

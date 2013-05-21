@@ -13,10 +13,10 @@ abstract class TailoredForm {
 	public	$error, $success	= false;
 	public		$debug			= false;
 	// Which anti-spam modules are available?
-	public		$avail_recaptcha= true;
+	public		$avail_recaptcha= false;
 	public		$avail_akismet	= false;
-	public		$avail_ayah		= true;
-	public		$check_bad_words= false;			// Turn this on child-classes to enable check.
+	public		$avail_ayah		= false;
+	public		$check_bad_words= true;				// Turn this on child-classes to enable check.
 	// Customise these in child-class
 	public		$nonce			= 'tailored-tools';
 	public		$admin_menu		= 'index.php';		// parent-hook for add_menu_item
@@ -92,11 +92,9 @@ abstract class TailoredForm {
 	 *	Enqueue scripts & styles
 	 */
 	function enqueue_scripts() {
-		$jvalidate = ((!is_ssl()) ? 'http://' : 'https://') . 'ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js';
-		wp_deregister_script('jquery-validate');	// Do this, assuming our CDN version is better & more up-to-date than others.
-		wp_enqueue_script('jquery-validate', $jvalidate, array('jquery'), '1.9.0', true);
-		wp_enqueue_script('ttools-loader', plugins_url('resource/loader.js', dirname(__FILE__)), array('jquery-validate','jquery-ui-datepicker'), false, true);
-		wp_enqueue_style('ttools', plugins_url('resource/custom.css', dirname(__FILE__)));
+		wp_enqueue_script('ttools-loader');
+		wp_enqueue_style('jquery-chosen');
+		wp_enqueue_style('ttools');
 	}
 	
 	// Over-ride if you need in special cases.
@@ -491,7 +489,6 @@ abstract class TailoredForm {
 	}
 	
 	function draw_datepicker($key, $q) {
-		wp_enqueue_script('jquery-ui-datepicker');
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
 	}
@@ -500,7 +497,7 @@ abstract class TailoredForm {
 		if (!function_exists('tt_country_array'))	require( plugin_dir_path(__FILE__).'countries.php' );
 		// Draw Element
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
-		echo "\t".'<select name="'.$key.'" id="'.$key.'" class="txt">'."\n";
+		echo "\t".'<select name="'.$key.'" id="'.$key.'" class="txt countries">'."\n";
 		// Prepend some custom options for easier forms
 		$q['options'] = array(
 			false	=> ' - Choose - ',
@@ -615,7 +612,7 @@ abstract class TailoredForm {
 		</fieldset>
 		</div><!-- left column -->
 		<div class="column column_right">
-		<p><strong>Anti-Spam Services:</strong> You should only use one of these at a time!</p>
+		<p><strong>Anti-Spam Services:</strong></p>
 		<?php	if ($this->avail_recaptcha) {	?>
 		<fieldset class="antispam recaptcha">
 		  <legend>reCAPTCHA</legend>

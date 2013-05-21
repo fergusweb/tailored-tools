@@ -19,7 +19,7 @@ class Tailored_Akismet {
 		global $wp_version;
 		$this->user_agent = 'WordPress/'.$wp_version.' | Akismet/'.$this->class-version;
 		
-		add_filter('ttools_map_akismet_fields', array(&$this,'map_form_fields'), 9, 1);
+		add_filter('ttools_map_akismet_fields', array(&$this,'map_form_fields'), 9, 2);
 		add_filter('ttools_form_filter_validate', array(&$this,'filter_form_validate_error'), 10, 2);
 	}
 	
@@ -41,7 +41,7 @@ class Tailored_Akismet {
 	function filter_form_validate_error($errors, $form) {
 		if (!$this->check_in_use($form->opts))	return $errors;
 		// Expecting array of (name=>, email=>, message=>) back.
-		$values = apply_filters( 'ttools_map_akismet_fields', array() );
+		$values = apply_filters( 'ttools_map_akismet_fields', array(), $form );
 		
 		$is_spam = $this->check_form( $form->opts['akismet']['api_key'], $values['name'], $values['email'], $values['message'] );
 		

@@ -36,7 +36,7 @@ class TailoredTinyMCE {
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		$plugins['tailored_tools'] = $this->plugin_url.'resource/tinymce.js.php';
+		$plugins['tailored_tools'] = $this->plugin_url.'js/tinymce.js.php';
 		return $plugins;
 	}
 	function filter_mce_css($css, $sep=' ,') {

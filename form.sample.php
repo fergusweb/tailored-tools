@@ -30,6 +30,9 @@ class SampleForm extends TailoredForm {
 		$this->load_questions();
 		$this->init();
 		add_action('ttools_form_before_submit_button', array(&$this,'do_before_submit_button'));
+		
+		// If using Akismet, map fields to values
+		add_filter('ttools_map_akismet_fields', array(&$this,'map_form_fields'), 10, 2);
 	}
 	
 	/**
@@ -48,7 +51,7 @@ class SampleForm extends TailoredForm {
 			'email' => array(
 				'to'		=> get_bloginfo('admin_email'),
 				'bcc'		=> '',
-				'subject'	=> 'Test Form Submission for '.site_url(),
+				'subject'	=> 'Sample Form Submission for '.site_url(),
 			),
 			'success' => array(
 				'message'	=> 'Thank you, your message has been sent.',
@@ -64,7 +67,10 @@ class SampleForm extends TailoredForm {
 	/**
 	 *	Filter to generate email headers
 	 */
-	function filter_headers($headers=false) {
+	function filter_headers($headers=false, $form=false) {
+		// Only if its for THIS form.
+		if ($this->form_name !== $form->form_name)	return $headers;
+		// Build headers
 		$from_name = $_POST['cust_name'];
 		$from_email = $_POST['cust_email'];
 		$headers = array(
@@ -73,6 +79,20 @@ class SampleForm extends TailoredForm {
 			"Return-Path: {$from_name} <{$from_email}>",
 		);
 		return $headers;
+	}
+	
+	
+	/**
+	 *	Map form fields to Akismet array for anti-spam check
+	 */
+	function map_form_fields($fields=false, $form=false) {
+		if ($this->form_name !== $form->form_name)	return $fields;
+		$fields = array(
+			'name'		=> $_POST['cust_name'],
+			'email'		=> $_POST['cust_email'],
+			'message'	=> $_POST['cust_message'],
+		);
+		return $fields;
 	}
 	
 	
@@ -86,7 +106,6 @@ class SampleForm extends TailoredForm {
 				'type'		=> 'text',
 				'required'	=> true,
 				'error'		=> 'Please provide your name',
-				'class'		=> 'testclass',
 			),
 			'cust_note'		=> array(
 				'type'		=> 'note',
