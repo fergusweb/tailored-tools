@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.  (Version 1.5+ has different style rules. Do not upgrade without checking these.)
-Version:		1.5.1
+Version:		1.5.3
 Author:			Tailored Web Services
 Author URI:		http://www.tailored.com.au
 */
@@ -18,10 +18,10 @@ function tailored_tools_register_scripts() {
 	
 	// Javascript
 	wp_deregister_script('jquery-validate');	// Assume this plugin is more up-to-date than other sources.  Might be bad mannered.
-//	wp_register_script('jquery-validate', '//ajax.aspnetcdn.com/ajax/jquery.validate/1.9/jquery.validate.min.js', array('jquery'), '1.9.0', true);
 	wp_register_script('jquery-validate', '//ajax.aspnetcdn.com/ajax/jquery.validate/1.11.1/jquery.validate.min.js', array('jquery'), '1.11.1', true);
 	wp_register_script('jquery-chosen', plugins_url('js/chosen.jquery.min.js', __FILE__), array('jquery'), false, true);
-	wp_register_script('ttools-loader', plugins_url('js/loader.js', __FILE__), array('jquery-validate','jquery-ui-datepicker', 'jquery-chosen'), false, true);
+	wp_register_script('jquery-timepicker', plugins_url('js/jquery.timepicker.js', __FILE__), array('jquery'), 1.3, true);
+	wp_register_script('ttools-loader', plugins_url('js/loader.js', __FILE__), array('jquery-validate','jquery-ui-datepicker', 'jquery-timepicker', 'jquery-chosen'), false, true);
 }
 
 //	Include Helper Classes
@@ -41,7 +41,8 @@ if (!class_exists('ContactForm'))		require( dirname(__FILE__).'/form.contact.php
 //	Sample Form
 //if (!class_exists('SampleForm')		require( dirname(__FILE__).'/form.sample.php' );
 
-
+//	Helper to embed JS like Adwords Conversion Code
+if (!class_exists('ttools_embed_page_js'))		require( dirname(__FILE__).'/embed-js.php' );
 
 
 

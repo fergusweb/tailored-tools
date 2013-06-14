@@ -418,6 +418,8 @@ abstract class TailoredForm {
 			case 'checkbox':		$this->draw_radio($key, $q);			break;
 			case 'textarea':		$this->draw_textarea($key, $q);			break;
 			case 'date':			$this->draw_datepicker($key, $q);		break;
+			case 'time':			$this->draw_timepicker($key, $q);		break;
+			case 'datetime':		$this->draw_datetimepicker($key, $q);	break;
 			default:				$this->draw_input($key, $q);			break;
 		}
 	}
@@ -491,6 +493,18 @@ abstract class TailoredForm {
 	function draw_datepicker($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+	}
+	
+	function draw_timepicker($key, $q) {
+		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
+		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt timepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		wp_enqueue_script('jquery-timepicker');
+	}
+	
+	function draw_datetimepicker($key, $q) {
+		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
+		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datetimepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		wp_enqueue_script('jquery-timepicker');
 	}
 	
 	function draw_country_select($key, $q) {

@@ -35,6 +35,9 @@ form.tws p.radio label input { width:auto; padding:0; background:none; border:no
 form.tws p label input.datepicker { }
 form.tws p label input.hasDatepicker { background-image:url(calendar.png); background-position:right 5px center; background-repeat:no-repeat;
 										cursor:pointer; max-width:10em; }
+form.tws p label input.datetimepicker { max-width:14em; }
+form.tws p label input.timepicker.hasDatepicker { background-image:url(time.png); }
+
 form.tws fieldset { border:0; margin:0 0 1rem 0; padding:0; }
 form.tws fieldset legend { font-weight:bold; margin:0; padding:0 0 1rem; }
 
@@ -69,6 +72,7 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 /**
  *	jQuery UI Datepicker
  */
+.ui-datepicker { display:none; }
 .ui-datepicker { background:#FFF; border:1px solid #CCC; padding:0.5em; box-shadow:2px 2px 4px #CCC; border-radius:0.3em; font-size:1rem; }
 .ui-datepicker .ui-datepicker-header a { float:left; display:block; width:16px; height:16px; background:url(icons.png) top right no-repeat; text-decoration:none; cursor:pointer; }
 .ui-datepicker .ui-datepicker-header a.ui-datepicker-next { float:right; background-position:top left; }
@@ -85,6 +89,24 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 .ui-datepicker .ui-datepicker-calendar a:hover { background:#c7dfef; }
 .ui-datepicker .ui-datepicker-calendar a.ui-state-active { background:#c7efeb; }
 
+/**
+ *	jQuery Timepicker (Datepicker Add-on)
+ */
+.ui-timepicker-div .ui-widget-header { margin-bottom: 8px; }
+.ui-timepicker-div dl { text-align: left; }
+.ui-timepicker-div dl dt { height: 25px; margin-bottom: -25px; }
+.ui-timepicker-div dl dd { margin: 0 10px 10px 65px; }
+.ui-timepicker-div td { font-size: 90%; }
+.ui-tpicker-grid-label { background: none; border: none; margin: 0; padding: 0; }
+
+.ui-timepicker-rtl{ direction: rtl; }
+.ui-timepicker-rtl dl { text-align: right; }
+.ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
+
+.ui-timepicker-div { border-top:1px solid #CCC; margin-top:3px; padding-top:5px; }
+.ui-timepicker-div select { color:#333; }
+.ui-datepicker-buttonpane { text-align:center; }
+.ui-datepicker-buttonpane button { padding:0.5em 1em; margin:0 0.3em; border-radius:0.5em; }
 
 /**
  *	jQuery UI Tabs
