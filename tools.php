@@ -2,14 +2,14 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.  (Version 1.5+ has different style rules. Do not upgrade without checking these.)
-Version:		1.5.3
+Version:		1.5.4
 Author:			Tailored Web Services
 Author URI:		http://www.tailored.com.au
 */
 
 
 
-// Register our scripts & styles for later enqueuing
+//	Register our scripts & styles for later enqueuing
 add_action('init', 'tailored_tools_register_scripts');
 function tailored_tools_register_scripts() {
 	// Stylesheets
@@ -24,25 +24,32 @@ function tailored_tools_register_scripts() {
 	wp_register_script('ttools-loader', plugins_url('js/loader.js', __FILE__), array('jquery-validate','jquery-ui-datepicker', 'jquery-timepicker', 'jquery-chosen'), false, true);
 }
 
+
 //	Include Helper Classes
 if (!class_exists('TailoredTinyMCE'))			require( dirname(__FILE__).'/lib/tinymce.php' );
 if (!class_exists('TailoredForm'))				require( dirname(__FILE__).'/lib/class.forms.php' );
-if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/shortcodes.php' );
-if (!class_exists('TailoredTools_GoogleMaps'))	require( dirname(__FILE__).'/googlemaps.php' );
 
 // Anti-spam Modules
 if (!class_exists('Tailored_reCAPTCHA'))		require( dirname(__FILE__).'/lib/class.recaptcha.php' );
 if (!class_exists('Tailored_Akismet'))			require( dirname(__FILE__).'/lib/class.akismet.php' );
 if (!class_exists('Tailored_Tools_AYAH'))		require( dirname(__FILE__).'/lib/class.ayah.php' );
 
-//	Contact Form
-if (!class_exists('ContactForm'))		require( dirname(__FILE__).'/form.contact.php' );
 
-//	Sample Form
-//if (!class_exists('SampleForm')		require( dirname(__FILE__).'/form.sample.php' );
+//	Run after all plugins loaded
+add_action('plugins_loaded', 'tailored_tools_plugins_loaded', 11);
+function tailored_tools_plugins_loaded() {
+	// Include Tailored Tools modules
+	if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/shortcodes.php' );
+	if (!class_exists('TailoredTools_GoogleMaps'))	require( dirname(__FILE__).'/googlemaps.php' );
+	//	Contact Form
+	if (!class_exists('ContactForm'))				require( dirname(__FILE__).'/form.contact.php' );
+	//	Helper to embed JS like Adwords Conversion Code
+	if (!class_exists('ttools_embed_page_js'))		require( dirname(__FILE__).'/embed-js.php' );
+}
 
-//	Helper to embed JS like Adwords Conversion Code
-if (!class_exists('ttools_embed_page_js'))		require( dirname(__FILE__).'/embed-js.php' );
+
+
+
 
 
 

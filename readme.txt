@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.5.1
-Stable tag:			1.5.3
+Tested up to:		3.6
+Stable tag:			1.5.4
 
 Contains some helper classes to help you build custom forms.
 
@@ -25,7 +25,7 @@ It also contains some other shortcode helpers for Google Maps, jQuery UI Tabs, a
 
 = How do I use this plugin? =
 
-Just activate it!  The plugin comes with a single pre-set contact form.  You can insert the contact form using shortcode: [ContactForm]
+Just activate it!  The plugin comes with a single pre-built contact form.  You can insert the contact form using shortcode: [ContactForm]
 
 = Can you help me create new forms? =
 
@@ -33,7 +33,7 @@ No. This plugin is available as-is.
 
 = So how do I learn how to use it? =
 
-The plugin contains two forms: a contact form, and a sample form.  Have a look at the source code to see how to write your own forms.  If you're not comfortable with PHP code, this plugin is probably not the best choice for you.
+The plugin contains two forms: a contact form, and a sample form.  Have a look at the source code to see how to write your own forms.  If you're not comfortable writing PHP code, this plugin is probably not the best choice for you.
 
 == Shortcodes ==
 
@@ -54,8 +54,14 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Changelog ==
 
+= 1.5.4 =
+* Expanded the allowed "type" for inputs.  Better support for HTML elements like color, date, number, range, tel, email, etc, plus hidden inputs.
+* Adjust load-order of files, to allow other plugins to override certain form classes
+* Changed the way to list logged form submissions in admin area (old code will still work too)
+* When viewing logged form submissions, now broken up by per-page (instead of listings hundreds in one go)
+
 = 1.5.3 =
-* Added an admin metabox to make it easier to add AdWords conversion tracking code to pages and posts.
+* Added an admin metabox to make it easier to add AdWords conversion tracking code to pages and posts
 
 = 1.5.2 = 
 * Introduce new input types: timepicker, datetimepicker
@@ -75,7 +81,7 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 * Modify the GoogleMaps shortcode for better responsive behavior.  Now uses Google Static Maps API to grab a JPG before embedding an iFrame.
 * Note: your theme will need some additional CSS to take advantage of these features.
 
-= 1.3.8 =
+= 1.3.9 =
 * Add a filter for ttools_form_bad_words_to_check to build a blacklist of words to ban
 * If one of those words is in the message, it immediately fails. (Spam check)
 

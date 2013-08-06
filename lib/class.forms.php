@@ -420,6 +420,9 @@ abstract class TailoredForm {
 			case 'date':			$this->draw_datepicker($key, $q);		break;
 			case 'time':			$this->draw_timepicker($key, $q);		break;
 			case 'datetime':		$this->draw_datetimepicker($key, $q);	break;
+			case 'number':			$this->draw_number_range($key, $q);		break;
+			case 'range':			$this->draw_number_range($key, $q);		break;
+			case 'hidden':			$this->draw_hidden_input($key, $q);		break;
 			default:				$this->draw_input($key, $q);			break;
 		}
 	}
@@ -428,8 +431,11 @@ abstract class TailoredForm {
 	 *	Form Element Helpers
 	 */
 	function draw_input($key, $q) {
+		// Allowed inputs
+		$allowed_types = array( 'color', 'date', 'datetime', 'datetime-local', 'email', 'month', 'number', 'range', 'search', 'tel', 'time', 'url', 'week' );
+		if (!in_array($q['type'], $allowed_types))	$q['type'] = 'text';
 		// Either Email or Text
-		if ($q['type'] != 'email')	$q['type'] = 'text';
+//		if ($q['type'] != 'email')	$q['type'] = 'text';
 		// Element class
 		$class = array('txt');
 		if ($q['type']=='email')	$class[] = 'email';
@@ -454,6 +460,12 @@ abstract class TailoredForm {
 		echo "\t".'<textarea '.$attrs.'>'.esc_textarea($_POST[$key]).'</textarea></label></p>'."\n";
 	}
 	
+	function draw_hidden_input($key, $q) {
+		if (!isset($q['value']))	$q['value'] = '';
+		if (isset($_POST[$key]))	$q['value'] = $_POST[$key];
+		echo '<input type="hidden" name="'.$key.'" value="'.$q['value'].'" />'."\n";
+	}
+	
 	function draw_select($key, $q) {
 		// Is this an associative array?
 		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
@@ -461,6 +473,7 @@ abstract class TailoredForm {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<select name="'.$key.'" id="'.$key.'" class="txt">'."\n";
 		foreach ($q['options'] as $val => $opt) {
+
 			if (!$is_assoc)	$val = $opt;
 			$sel = ($_POST[$key] == $val) ? ' selected="selected"' : '';
 			echo "\t\t".'<option value="'.$val.'"'.$sel.'>'.$opt.'</option>'."\n";
@@ -506,6 +519,19 @@ abstract class TailoredForm {
 		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datetimepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
 		wp_enqueue_script('jquery-timepicker');
 	}
+	
+	function draw_number_range($key, $q) {
+		$class = array('txt', 'number');
+		if ($q['required'])		$class[] = 'required';
+		$class = ' class="'.implode(' ',$class).'"';
+		$min = (!empty($q['min'])) ? ' min="'.$q['min'].'"' : '';
+		$min = (!empty($q['max'])) ? ' max="'.$q['max'].'"' : '';
+		$step = (!empty($q['step'])) ? ' step="'.$q['step'].'"' : '';
+		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
+		echo "\t".'<input type="'.$q['type'].'"'.$class.'  name="'.$key.'" value="'.esc_attr($_POST[$key]).'" id="'.$key.'"'.$min.$max.$step.' /></label></p>'."\n";
+		
+	}
+	
 	
 	function draw_country_select($key, $q) {
 		if (!function_exists('tt_country_array'))	require( plugin_dir_path(__FILE__).'countries.php' );
@@ -679,8 +705,18 @@ abstract class TailoredForm {
 	
 	/**
 	 *	Extend this if you want to list logged submissions
+	 *	Or you can just create a WP_List_Table object with the right name
 	 */
 	function admin_list_logs() {
+		if (!class_exists($this->log_type.'_Table'))	return;
+		$table = new contact_form_log_Table();
+		$table->prepare_items();
+		?>
+        <form id="enquiries" method="post">
+            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+            <?php $table->display() ?>
+        </form>
+		<?php
 	}
 	
 	
