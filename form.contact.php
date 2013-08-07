@@ -127,11 +127,12 @@ class ContactForm extends TailoredForm {
  */
 if (is_admin()) {
 	if(!class_exists('WP_List_Table'))	require_once( ABSPATH . 'wp-admin/includes/class-wp-list-table.php' );
-	// Best to use the $log_type as the table name, like this:  $logtype_Table
 	
+	// Will auto-load if you use $log_type as table name, like this:  $logtype_Table	
 	class contact_form_log_Table extends WP_List_Table {
 		
-		function __construct( $per_page=20) {
+		function __construct( $post_type='', $per_page=20) {
+			$this->post_type = $post_type;
 			$this->per_page = $per_page;
 			parent::__construct(array(
 				'singular'	=> 'enquiry',
@@ -177,7 +178,7 @@ if (is_admin()) {
 			
 			$posts = get_posts(array(
 				'numberposts'	=> -1,
-				'post_type'		=> 'contact_form_log',	// Can we link this to class?
+				'post_type'		=> $this->post_type,
 				'post_status'	=> 'private',
 			));
 			

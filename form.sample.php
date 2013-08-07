@@ -3,6 +3,7 @@
 /**
  *	Sample Form Class
  *	Uses TailoredForm as parent
+ *	This is a demo form, showing some possible ways to do stuff
  */
 
 
@@ -172,6 +173,7 @@ class SampleForm extends TailoredForm {
 	
 	/**
 	 *	Admin: This is the part that lists logged submissions
+	 *	Note: This is the old way.  New way uses WP_List_Table class.  See contact form for demo.
 	 */
 	function admin_list_logs() {
 		$posts = get_posts(array(

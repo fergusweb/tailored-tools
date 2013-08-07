@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.6
-Stable tag:			1.5.4
+Stable tag:			1.6
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,11 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+
+= 1.6 =
+* SVN Commit for 1.5.4 didn't include all updates.
+* Genesis 2.0+ has an "embed scripts" meta box.  So if box is empty and running 2.0 plus, disable our metabox.
+* Change ' to " in shortcodes.php (personal preference)
 
 = 1.5.4 =
 * Expanded the allowed "type" for inputs.  Better support for HTML elements like color, date, number, range, tel, email, etc, plus hidden inputs.

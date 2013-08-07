@@ -37,11 +37,12 @@ class TailoredTools_GoogleMaps {
 		$link_url = 'http://maps.google.com.au/maps?q='.urlencode($atts['address']);
 		?>
 		
-		<div class="<?php echo $atts['class']; ?>"><div>
-<a href="<?php echo $link_url; ?>"><img src="<?php echo $image_url; ?>" /></a>
-
-<iframe class="<?php echo $atts['class']; ?>" width="<?php echo $atts['width']; ?>" height="<?php echo $atts['height']; ?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $address_url; ?>"></iframe>
-		</div></div><!-- Google Map -->
+		<div class="<?php echo $atts['class']; ?>">
+			<div>
+				<a href="<?php echo $link_url; ?>"><img src="<?php echo $image_url; ?>" /></a>
+				<iframe class="<?php echo $atts['class']; ?>" width="<?php echo $atts['width']; ?>" height="<?php echo $atts['height']; ?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $address_url; ?>"></iframe>
+			</div>
+		</div><!-- Google Map -->
 		
 		<?php
 		return ob_get_clean();

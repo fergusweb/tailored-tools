@@ -706,10 +706,13 @@ abstract class TailoredForm {
 	/**
 	 *	Extend this if you want to list logged submissions
 	 *	Or you can just create a WP_List_Table object with the right name
+	 *	Name should be:  "{$this->log_type}_Table"
 	 */
 	function admin_list_logs() {
-		if (!class_exists($this->log_type.'_Table'))	return;
-		$table = new contact_form_log_Table();
+		$class_name = $this->log_type.'_Table';
+		if (!class_exists($class_name))	return;
+		$per_page = (is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
+		$table = new $class_name( $this->log_type, $per_page );
 		$table->prepare_items();
 		?>
         <form id="enquiries" method="post">
