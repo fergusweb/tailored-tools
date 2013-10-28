@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.6
-Stable tag:			1.6
+Tested up to:		3.7
+Stable tag:			1.7
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,8 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+= 1.7 =
+* Now including a graph before displaying logs in admin area, to show leads over time.
 
 = 1.6 =
 * SVN Commit for 1.5.4 didn't include all updates.

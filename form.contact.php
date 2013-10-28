@@ -23,6 +23,8 @@ class ContactForm extends TailoredForm {
 	public		$avail_ayah		= true;
 	public		$check_bad_words= true;
 	
+	public		$show_graph		= true;
+	
 	
 	/**
 	 *	Constructor

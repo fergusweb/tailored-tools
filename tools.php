@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.  (Version 1.5+ has different style rules. Do not upgrade without checking these.)
-Version:		1.6
+Version:		1.7
 Author:			Tailored Web Services
 Author URI:		http://www.tailored.com.au
 */

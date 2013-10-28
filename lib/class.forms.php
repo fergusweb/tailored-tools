@@ -25,6 +25,7 @@ abstract class TailoredForm {
 	public		$option_key		= 'ttools_option_key';
 	public		$shortcode		= 'FormShortcode';
 	public		$log_type		= false;			// False to disable logging, or post-type
+	public		$show_graph		= false;			// Embed a graph before results to show leads over time
 	public		$submit_key		= 'submit_form';	// submit button key - for processing.
 	public		$submit_label	= 'Submit Form';
 	
@@ -620,6 +621,8 @@ abstract class TailoredForm {
 			$this->save_options();
 			echo '<div class="updated"><p>Settings have been saved.</p></div>'."\n";
 		}
+		// Show graph
+		if ($this->log_type)	$this->admin_graph_logs();
 		// Show & Save logged submissions
 		if ($this->log_type)	$this->admin_list_logs();
 		// Settings Form
@@ -703,6 +706,104 @@ abstract class TailoredForm {
 	}
 	
 	
+	
+	/**
+	 *	Graph our enquiries over time.
+	 */
+	function admin_graph_logs() {
+		if (!$this->show_graph || !$this->log_type)		return false;
+		wp_enqueue_script('google-jsapi', '//www.google.com/jsapi', false, false, true);
+		wp_enqueue_script('jquery-ui-datepicker');
+		wp_enqueue_style('ui-datepicker', '//ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css');
+		add_action('admin_print_footer_scripts', array($this,'admin_graph_js'));
+		
+		if ($_REQUEST['date_from']) {	$_REQUEST['date_from'] = date('M j, Y', strtotime( $_REQUEST['date_from'] ));	}
+		if ($_REQUEST['date_to']) {	$_REQUEST['date_to'] = date('M j, Y', strtotime( $_REQUEST['date_to'] ));	}
+		
+		
+		if (empty($_REQUEST['date_from']))	$_REQUEST['date_from'] = date('M j, Y', strtotime("-30 days"));
+		if (empty($_REQUEST['date_to']))	$_REQUEST['date_to'] = date('M j, Y');
+		
+		global $wpdb;
+		$total_leads = $wpdb->get_var("
+			SELECT COUNT( * ) AS `num_leads`
+			FROM `{$wpdb->posts}`
+			WHERE `post_type` = '{$this->log_type}'
+			  AND DATE(`post_date`) BETWEEN '".date('Y-m-d',strtotime($_REQUEST['date_from']))."' AND '".date('Y-m-d',strtotime($_REQUEST['date_to']))."'
+		");
+		?>
+		<div id="graph">
+			<p class="total_leads">Number of leads for selected time period: <?php echo $total_leads; ?></p>
+			<div class="ranges">
+			<form method="POST">
+				<p><label><span>From:</span> <input type="text" name="date_from" value="<?php echo $_REQUEST['date_from']; ?>" /></label></p>
+				<p><label><span>To:</span> <input type="text" name="date_to" value="<?php echo $_REQUEST['date_to']; ?>" /></label></p>
+				<p class="submit"><input class="button-primary" type="submit" value="Go" /></p>
+			</form>
+			</div>
+			<div id="chart"></div>
+		</div>
+<style><!--
+#graph { background:#FFF; margin:1em 0.5em 2em; padding:0.5em; border:1px solid #DFDFDF; border-radius:0.3em; }
+#graph p.total_leads { float:left; margin:0; padding:0.5em 0 0; }
+#graph .ranges { text-align:right; }
+#graph .ranges p { display:inline-block; margin:0 1em 0; padding:0; }
+#graph .ranges p input { cursor:pointer; }
+--></style>
+		<?php
+	}
+	
+	function admin_graph_js() {
+		global $wpdb;
+		$data = array();
+		$date  = $_REQUEST['date_from'];
+		$loop = 0;
+		while (strtotime($date) <= strtotime($_REQUEST['date_to'])) {
+			$result = $wpdb->get_results("
+				SELECT COUNT( * ) AS `num_leads`, DATE(`post_date`) AS `date`
+				FROM `{$wpdb->posts}`
+				WHERE `post_type` = '{$this->log_type}'
+				  AND DATE(`post_date`) = '".date('Y-m-d',strtotime($date))."';
+			");
+			$data[] = array(	
+				'Date'	=> date('jS M Y', strtotime($date)),	
+				'Leads'	=> $result[0]->num_leads,
+			);
+			$date = date('Y-m-d', strtotime("+1 day", strtotime($date)));
+
+		}
+		?>
+<script type="text/javascript"><!--
+jQuery(document).ready(function($){
+	$('#graph .ranges label input').datepicker({ numberOfMonths:3, showButtonPanel:true, dateFormat:'M d, yy' });
+});
+
+google.load('visualization', '1.0', {'packages':['corechart']});
+google.setOnLoadCallback(drawChart);
+function drawChart() {
+	
+	var data = google.visualization.arrayToDataTable([
+		['Day', 'Leads'],
+		<?php
+		foreach ($data as $row) {
+			echo "['".$row['Date']."', ".$row['Leads']." ],";
+		}
+		?>
+		
+	]);
+	
+	var options = {
+		title:	"Leads per day",
+	};
+	
+	var chart = new google.visualization.LineChart(document.getElementById('chart'));
+	chart.draw(data, options);
+}
+--></script>
+		<?php
+	}
+	
+	
 	/**
 	 *	Extend this if you want to list logged submissions
 	 *	Or you can just create a WP_List_Table object with the right name
@@ -721,6 +822,9 @@ abstract class TailoredForm {
         </form>
 		<?php
 	}
+	
+	
+	
 	
 	
 	/** 
@@ -806,10 +910,6 @@ abstract class TailoredForm {
 	
 	
 }
-
-
-
-
 
 
 
