@@ -41,23 +41,45 @@ class TailoredTools_Shortcodes {
 	/**
 	 *	Shortcode:  [tabs] for jQuery UI Tabs
 	 *	Javascript does the heavy lifting
+	 *	Revised this to use DOMDocument instead of str_replace, to allow for <h2 id="something">
 	 */
 	function shortcode_ui_tabs($atts=false, $content=null) {
 		// Strip start and end <p> tags to avoid broken HTML
 		if (substr($content, 0, 4)=='</p>')	$content = substr($content, 4);
 		if (substr($content, -3, 3)=='<p>')	$content = substr($content, 0, -3);
 		$content = trim($content);
-		// Apply a wrapper for each panel
-		$content = str_replace('<h2>', '</div><div class="tab_panel"><h2>', $content);
-		// Fix start and end <div> panels to avoid broken HTML
-		if (substr($content, 0, 6)=='</div>')	$content = substr($content, 6);
-		$content .= '</div>'."\n";
-		// Using do_shortcode() to apply shortcodes inside the tabs
-		$content = '<div class="ui_tabs">'."\n".do_shortcode($content)."\n".'</div>'."\n";
-		// Add JS
+		
+		$dom = new DOMDocument();
+		$dom->loadHTML( $content );
+		// Loop H2 and wrap
+		$nodes = $dom->getElementsByTagName('h2');
+		foreach ($nodes as $i => $h) {
+			$div = $dom->createElement('div');
+			$div->setAttribute('class', 'tab_panel');
+			while ($h->nextSibling && $h->nextSibling->localName != 'h2') {
+				$div->appendChild( $h->nextSibling );
+			}
+			if ($h->nextSibling) {
+				$h->parentNode->insertBefore($div, $h->nextSibling);
+			} else {
+				$h->parentNode->appendChild($div);
+			}
+		}
+		// Now go through and remove empty tags
+		$xp = new DOMXPath($dom);
+		foreach($xp->query('//*[not(node() or self::br) or normalize-space() = ""]') as $node) {
+			$node->parentNode->removeChild($node);
+		}
+		
+		$output = preg_replace('~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $dom->saveHTML());
+		$output = '<div class="ui_tabs">'."\n".do_shortcode($output)."\n".'</div>'."\n";
+		// Fix some strange HTML
+		$output = str_replace('<p><form', '<form', $output);
+		$output = str_replace('</form></p>', '</form>', $output);
+		$output = str_replace("</form>\n</p>", '</form>', $output);
+		
 		wp_enqueue_script('jquery-ui-tabs');
-		// Return
-		return $content;
+		return $output;
 	}
 	
 

@@ -120,7 +120,7 @@ abstract class TailoredForm {
 		if (!$this->log_type || !data || empty($data))		return false;
 		$insertID = wp_insert_post(array(
 			'post_title'	=> '',
-			'post_content'	=> serialize($data),
+			'post_content'	=> json_encode($data),
 			'post_status'	=> 'private',
 			'post_type'		=> $this->log_type,
 		));
@@ -903,9 +903,13 @@ function drawChart() {
 	/**
 	 *	Helper to fix the "Error at offset" issue
 	 */
-	function __unserialize($sObject) {
-		$__ret =preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $sObject );
-		return unserialize($__ret);
+	function __unserialize($data) {
+		// First attempt json_decode
+		$decoded = json_decode($data);
+		if ($decoded)	return (array) $decoded;
+		// If not, go ahead with unseralize
+		$data = preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $data );
+		return unserialize($data);
 	}
 	
 	

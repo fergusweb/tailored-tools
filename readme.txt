@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.7
-Stable tag:			1.7.1
+Stable tag:			1.7.3
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,15 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+
+= 1.7.3 = 
+* Update how the [tabs] shortcode is parsed & handled to allow for <h2 class="something"> attributes
+* Update the related JS to handle new format, and to allow for <a href="#something"> triggers
+
+= 1.7.2 = 
+* Now using json_encode() instead of serialize() when saving arrays to database
+* Maintaining backwards compat so that old logged records still readable
+
 = 1.7.1 = 
 * Fix a stylesheet problem with jquery-chosen
 

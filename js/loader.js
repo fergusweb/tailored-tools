@@ -111,6 +111,7 @@ jQuery(function($) {
 
 /**
  *	Launch jQuery UI Tabs for .ui_tabs sections
+ *	Revised to handle different HTML format, to handle <h2 id="something">
  */
 var tab_counter = 0;
 jQuery(document).ready(function($) {
@@ -118,16 +119,35 @@ jQuery(document).ready(function($) {
 	if (!$().tabs)						return;
 	$('.ui_tabs').each(function(i, tabset) {
 		var ul = $( document.createElement('ul') );
-		//var ul = $('ul');
 		$(tabset).find('.tab_panel').each(function() {
 			tab_counter++;
-			label = $(this).find('h2:first').text();
+			tab_id = 'tab-'+tab_counter;
+			label = $(this).prev('h2').text();
+			hid = $(this).prev('h2').attr('id');
+			if (typeof hid !== 'undefined' && hid !== false) {
+				tab_id = hid;
+			}
+			$(this).prev('h2').prependTo( $(this) ).removeAttr('id');
 			if (label == '')	label = 'TAB_TITLE_MISSING';
-			$(ul).append('<li><a href="#tab-' + tab_counter + '"><span>' + label + '</span></a></li>');
-			$(this).attr( 'id', 'tab-'+tab_counter );
+			$(ul).append('<li><a href="#' + tab_id + '"><span>' + label + '</span></a></li>');
+			$(this).attr( 'id', tab_id );
+			// Now set up triggers for <a href="#something"> matching our tab_ids
+			var $this = $(this);
+			$("a[href$='#"+tab_id+"']").click(function(e) {
+				hash = $(this).attr('href').substr($(this).attr('href').indexOf('#')+1);
+				$('.ui-tabs a[href=#'+hash+']').click();
+				$('html,body').animate({ scrollTop:$('.ui-tabs a[href=#'+tab_id+']').offset().top-30 },500);
+				e.preventDefault;
+				return false;
+			});
 		});
 		$(ul).prependTo( $(tabset) );
+//		alert( $(tabset).html() );
 		$(tabset).tabs();
+		
 	});
+//	alert('done');
+	$('.ui-tabs').tabs('load', 2);
 });
+
 
