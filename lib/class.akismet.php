@@ -17,7 +17,7 @@ class Tailored_Akismet {
 	 */
 	function __construct() {
 		global $wp_version;
-		$this->user_agent = 'WordPress/'.$wp_version.' | Akismet/'.$this->class-version;
+		$this->user_agent = 'WordPress/'.$wp_version.' | Akismet/'.$this->class_version;
 		
 		add_filter('ttools_map_akismet_fields', array(&$this,'map_form_fields'), 9, 2);
 		add_filter('ttools_form_filter_validate', array(&$this,'filter_form_validate_error'), 10, 2);

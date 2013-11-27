@@ -35,7 +35,7 @@ jQuery(function($) {
 	if ($('form .datepicker').length < 1)	return;
 	if (!$().datepicker)					return;
 	$('form input.datepicker, form p.datepicker input').datepicker({
-		dateFormat:		'dd-mm-yy',
+		dateFormat:		'dd/mm/yy',
 		changeMonth:	true,
 		changeYear:		true
 	});
@@ -64,7 +64,7 @@ jQuery(function($) {
 	$('form input.datetimepicker, form p.datetimepicker input').datetimepicker({
 		changeMonth:	true,
 		changeYear:		true,
-		dateFormat:		'dd-mm-yy',
+		dateFormat:		'dd/mm/yy',
 		timeFormat:		'h:mm tt',
 		stepMinute:		15,
 		hourMin:		8,
@@ -142,12 +142,8 @@ jQuery(document).ready(function($) {
 			});
 		});
 		$(ul).prependTo( $(tabset) );
-//		alert( $(tabset).html() );
 		$(tabset).tabs();
-		
 	});
-//	alert('done');
-	$('.ui-tabs').tabs('load', 2);
 });
 
 

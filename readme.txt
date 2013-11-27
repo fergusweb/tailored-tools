@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.7
-Stable tag:			1.7.3
+Stable tag:			1.7.4
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,15 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+
+= 1.7.4 =
+* New shortcode handler for [tabs] had an issue with iframes and other elements. Now corrected.
+* Change input type for date,time,datetime elements
+* Fix some code that was causing PHP warnings
+* Add some CSS for responsive map embed
+* Add some CSS for better ui-datepicker default apperance
+* Change dateformat from dd-mm-yy to dd/mm/yy (was a problem with validation format)
+* Allow a default of 0 on form inputs, and allow a supplied "0" value to pass server-side validation
 
 = 1.7.3 = 
 * Update how the [tabs] shortcode is parsed & handled to allow for <h2 class="something"> attributes

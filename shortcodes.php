@@ -66,9 +66,11 @@ class TailoredTools_Shortcodes {
 			}
 		}
 		// Now go through and remove empty tags
+		$allowed_nodes = array( 'param', 'embed', 'iframe', 'div', 'object' );
 		$xp = new DOMXPath($dom);
 		foreach($xp->query('//*[not(node() or self::br) or normalize-space() = ""]') as $node) {
-			$node->parentNode->removeChild($node);
+			if (in_array($node->tagName, $allowed_nodes))	continue;
+			$node->parentNode->removeChild($node);	// For some reason, this breaks on iFrames and some other elements.  Dodge by $allowed_nodes
 		}
 		
 		$output = preg_replace('~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $dom->saveHTML());

@@ -29,6 +29,7 @@ class ttools_embed_page_js {
 	
 	function output_embed_code() {
 		global $post;
+		if (!$post || !is_object($post))	return false;
 		$code = get_post_meta($post->ID, $this->meta_value_key, true);
 		if (empty($code))	return false;
 		// Output
@@ -37,6 +38,7 @@ class ttools_embed_page_js {
 	
 	function save_post( $post_id ) {
 		// Security check
+		if (empty($_POST) || !isset($_POST['embed_javascript']))						return;
 		if ($_POST['post_type'] == 'page' && !current_user_can('edit_page', $post_id))	return;
 		if ($_POST['post_type'] == 'post' && !current_user_can('edit_post', $post_id))	return;
 		if (!isset($_POST['ttools_embedjs']) || ! wp_verify_nonce($_POST['ttools_embedjs'], plugin_basename(__FILE__)))	return;

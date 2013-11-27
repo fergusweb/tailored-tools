@@ -69,25 +69,29 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 }
 
 
+
 /**
  *	jQuery UI Datepicker
  */
 .ui-datepicker { display:none; }
-.ui-datepicker { background:#FFF; border:1px solid #CCC; padding:0.5em; box-shadow:2px 2px 4px #CCC; border-radius:0.3em; font-size:1rem; }
-.ui-datepicker .ui-datepicker-header a { float:left; display:block; width:16px; height:16px; background:url(icons.png) top right no-repeat; text-decoration:none; cursor:pointer; }
+.ui-datepicker { background:#FFF; border:1px solid #CCC; padding:0.5em; box-shadow:2px 2px 4px #CCC; border-radius:0.3em; font-size:1em; }
+.ui-datepicker .ui-datepicker-header a { float:left; display:block; width:16px; height:16px; background:url(icons.png) top right no-repeat; text-decoration:none; cursor:pointer; margin-top:0.3em; }
 .ui-datepicker .ui-datepicker-header a.ui-datepicker-next { float:right; background-position:top left; }
-.ui-datepicker .ui-datepicker-header a span { display:block; font-size:1px; text-indent:-2999px; }
+.ui-datepicker .ui-datepicker-header a span { display:block; font-size:1px; text-indent:-2999px;  }
 .ui-datepicker .ui-datepicker-header .ui-datepicker-title { text-align:center; }
 
-.ui-datepicker .ui-datepicker-header select { width:auto; padding:0; box-shadow:none; border:1px solid #DDD; color:#333; cursor:pointer; }
+.ui-datepicker .ui-datepicker-header select { width:auto; padding:0; box-shadow:none; border:1px solid #DDD; color:#333; cursor:pointer; margin:0 0.1em; }
 
-.ui-datepicker .ui-datepicker-calendar { }
+.ui-datepicker .ui-datepicker-calendar { margin:0; line-height:1.4; }
 .ui-datepicker .ui-datepicker-calendar th, .ui-datepicker .ui-datepicker-calendar td { text-align:center; }
 .ui-datepicker .ui-datepicker-calendar th { padding:0.2em; }
-.ui-datepicker .ui-datepicker-calendar td { }
+.ui-datepicker .ui-datepicker-calendar td { padding:0; }
 .ui-datepicker .ui-datepicker-calendar a { display:block; padding:0.2em; text-decoration:none; }
 .ui-datepicker .ui-datepicker-calendar a:hover { background:#c7dfef; }
 .ui-datepicker .ui-datepicker-calendar a.ui-state-active { background:#c7efeb; }
+
+
+
 
 /**
  *	jQuery Timepicker (Datepicker Add-on)
@@ -108,6 +112,8 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 .ui-datepicker-buttonpane { text-align:center; }
 .ui-datepicker-buttonpane button { padding:0.5em 1em; margin:0 0.3em; border-radius:0.5em; }
 
+
+
 /**
  *	jQuery UI Tabs
  */
@@ -126,3 +132,16 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 .ui-tabs .tab_panel h1, .format_text .ui-tabs .tab_panel h2 { display:none; }
 .ui-tabs .tab_panel:after { clear:both; content:"."; display:block; height:0; visibility:hidden; }
 
+
+
+/**
+ *	Responsive map embed
+ */
+.googlemap img, 
+.googlemap iframe { background:#FFF; border:1px solid #DDD; padding:2px; border-radius:10px; box-shadow:1px 1px 2px #DDD; margin:10px auto 15px; max-width:100%;  }
+.googlemap img { max-width:95%; height:auto; display:block; }
+.googlemap iframe { display:none; }
+@media only screen and (min-width:500px) {
+	.googlemap img { display:none; }
+	.googlemap iframe { display:block; max-width:97%; }
+}

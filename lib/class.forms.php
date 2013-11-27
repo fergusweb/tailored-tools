@@ -286,7 +286,7 @@ abstract class TailoredForm {
 	function validate_question($key, $q) {
 		if (!$q['required'])		return;
 		if ($q['type'] != 'file') {
-			if (!isset($_POST[$key]) || empty($_POST[$key]))								$this->error[] = $q['error'];
+			if (!isset($_POST[$key]) || trim($_POST[$key])=='')								$this->error[] = $q['error'];
 			if ($q['type'] == 'email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
 		} else
 		if ($q['type'] == 'file') {
@@ -322,8 +322,8 @@ abstract class TailoredForm {
 		if (!is_array($badwords))					$badwords = array();
 		// Add words to existing array
 		$badwords = array_merge($badwords, array(
-			'ambien', 'cialis', 'buycialis', 'hydrocodone', 'viagraonline', 'cialisonline', 'phentermine', 'viagrabuy', 'percocet', 'tramadol',
-			'propecia', 'xenical', 'meridia', 'levitra', 'vicodin', 'viagra', 'valium', 'porno', 'xanax', 'href=', // 'sex', 'soma'
+			'buycialis', 'hydrocodone', 'viagraonline', 'cialisonline', 'phentermine', 'viagrabuy', 'percocet', 'tramadol', // 'ambien', 
+			'propecia', 'xenical', 'meridia', 'levitra', 'vicodin', 'viagra', 'valium', 'porno', 'xanax', 'href=', // 'sex', 'soma', 'cialis', 
 		));
 		$badwords = array_unique($badwords);
 		return $badwords;
@@ -397,6 +397,9 @@ abstract class TailoredForm {
 	}
 	
 	function draw_element($key, $q) {
+		if (!isset($_POST[$key]))		$_POST[$key] = '';
+		if (!isset($q['required']))		$q['required'] = false;
+		if (!isset($q['class']))		$q['class'] = false;
 		// Separator line?
 		if ($q['type'] == 'sep') { echo '<p class="sep">&nbsp;</p>'."\n"; return; }
 		// Heading line
@@ -404,7 +407,7 @@ abstract class TailoredForm {
 		// Text Note
 		if ($q['type'] == 'note') { echo '<p class="note '.$q['class'].'">'.nl2br($q['label']).'</p>'."\n"; return; }
 		// Prepare default value
-		if (!isset($_POST[$key]) && !empty($q['default']))	$_POST[$key] = $q['default'];
+		if (!isset($_POST[$key]) && isset($q['default']))	$_POST[$key] = $q['default'];
 		// Prepare element class
 		if (!is_array($q['class']))		$q['class'] = array($q['class']);
 		if (in_array($q['type'], array('radio', 'checkbox')))	$q['class'][] = 'radio';
@@ -431,7 +434,7 @@ abstract class TailoredForm {
 	/**
 	 *	Form Element Helpers
 	 */
-	function draw_input($key, $q) {
+	function draw_input($key, $q) {		
 		// Allowed inputs
 		$allowed_types = array( 'color', 'date', 'datetime', 'datetime-local', 'email', 'month', 'number', 'range', 'search', 'tel', 'time', 'url', 'week' );
 		if (!in_array($q['type'], $allowed_types))	$q['type'] = 'text';
@@ -506,18 +509,18 @@ abstract class TailoredForm {
 	
 	function draw_datepicker($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
-		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		echo "\t".'<input type="date" name="'.$key.'" id="'.$key.'" class="txt datepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
 	}
 	
 	function draw_timepicker($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
-		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt timepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		echo "\t".'<input type="time" name="'.$key.'" id="'.$key.'" class="txt timepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
 		wp_enqueue_script('jquery-timepicker');
 	}
 	
 	function draw_datetimepicker($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
-		echo "\t".'<input type="text" name="'.$key.'" id="'.$key.'" class="txt datetimepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		echo "\t".'<input type="datetime" name="'.$key.'" id="'.$key.'" class="txt datetimepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
 		wp_enqueue_script('jquery-timepicker');
 	}
 	
@@ -562,17 +565,31 @@ abstract class TailoredForm {
 	
 	
 	
+	function count_logs() {
+		// Used cached variable if available
+		$counts = wp_cache_get( 'count_'.$this->log_type, 'counts' );
+		// Query database to get recent count
+		global $wpdb;
+		$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts} WHERE post_type = '{$this->log_type}' GROUP BY post_status";
+		$results = (array) $wpdb->get_results( $query, ARRAY_A );
+		$counts = array_fill_keys( get_post_stati(), 0 );
+		foreach ( $results as $row )	$counts[ $row['post_status'] ] = $row['num_posts'];
+		$counts = (object) $counts;
+		// Set cache for next time, and return value
+		wp_cache_set( 'count_'.$this->log_type, $counts, 'counts' );
+		return $counts;
+	}
 	
 	/**
 	 *	Admin Functions
 	 */
 	function admin_menu() {
 		if (!$this->form_name)		return false;
-		$menu_label == $this->form_name;
+		$menu_label = $this->form_name;
 		// Add a counter to menu name?
 		$counter = '';
 		if ($this->log_type) {
-			$count = wp_count_posts( $this->log_type );
+			$count = $this->count_logs();
 			if ($count && $count->private>0)	$counter = '<span class="update-plugins"><span class="update-count">'. $count->private .'</span></span>';
 		}
 		$hook = add_submenu_page($this->admin_menu, $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array(&$this,'admin_page'));
@@ -604,18 +621,18 @@ abstract class TailoredForm {
 				'message'	=> $_POST['failure']['msg'],
 			));
 			$this->opts['recaptcha'] = array_merge((array)$this->opts['recaptcha'], array(
-				'use'		=> (($_POST['recaptcha']['use'] == 'yes') ? true : false),
-				'public'	=> $_POST['recaptcha']['public'],
-				'private'	=> $_POST['recaptcha']['private'],
+				'use'		=> ((isset($_POST['recaptcha']['use']) && $_POST['recaptcha']['use'] == 'yes') ? true : false),
+				'public'	=> ((isset($_POST['recaptcha']['public'])) ? $_POST['recaptcha']['public'] : ''),
+				'private'	=> ((isset($_POST['recaptcha']['private'])) ? $_POST['recaptcha']['private'] : ''),
 			));
 			$this->opts['akismet'] = array_merge((array)$this->opts['akismet'], array(
-				'use'		=> (($_POST['akismet']['use'] == 'yes') ? true : false),
-				'api_key'	=> $_POST['akismet']['api_key'],
+				'use'		=> ((isset($_POST['akismet']['use']) && $_POST['akismet']['use'] == 'yes') ? true : false),
+				'api_key'	=> ((isset($_POST['akismet']['api_key'])) ? $_POST['akismet']['api_key'] : ''),
 			));
 			$this->opts['ayah'] = array_merge((array)$this->opts['recaptcha'], array(
-				'use'		=> (($_POST['ayah']['use'] == 'yes') ? true : false),
-				'publisher_key'	=> $_POST['ayah']['publisher_key'],
-				'scoring_key'	=> $_POST['ayah']['scoring_key'],
+				'use'			=> ((isset($_POST['ayah']['use']) && $_POST['ayah']['use'] == 'yes') ? true : false),
+				'publisher_key'	=> ((isset($_POST['ayah']['publisher_key'])) ? $_POST['ayah']['publisher_key'] : ''),
+				'scoring_key'	=> ((isset($_POST['ayah']['scoring_key'])) ? $_POST['ayah']['scoring_key'] : ''),
 			));
 			
 			$this->save_options();
@@ -657,6 +674,11 @@ abstract class TailoredForm {
 		<div class="column column_right">
 		<p><strong>Anti-Spam Services:</strong></p>
 		<?php	if ($this->avail_recaptcha) {	?>
+		<?php
+		if (!isset($this->opts['recaptcha']['use']))	$this->opts['recaptcha']['use'] = false;
+		if (!isset($this->opts['recaptcha']['public']))	$this->opts['recaptcha']['public'] = '';
+		if (!isset($this->opts['recaptcha']['private']))	$this->opts['recaptcha']['private'] = '';
+		?>
 		<fieldset class="antispam recaptcha">
 		  <legend>reCAPTCHA</legend>
 			<p class="tick"><label>
@@ -670,6 +692,10 @@ abstract class TailoredForm {
 		</fieldset>
 		<?php	}								?>
 		<?php	if ($this->avail_akismet) {		?>
+		<?php
+		if (!isset($this->opts['akismet']['use']))		$this->opts['akismet']['use'] = false;
+		if (!isset($this->opts['akismet']['api_key']))	$this->opts['akismet']['api_key'] = '';
+		?>
 		<fieldset class="antispam akismet">
 			<legend>Akismet Anti-Spam</legend>
 			<p class="tick"><label>
@@ -681,6 +707,12 @@ abstract class TailoredForm {
 		</fieldset>
 		<?php	}								?>
 		<?php	if ($this->avail_ayah) {		?>
+		<?php
+		if (!isset($this->opts['ayah']['use']))				$this->opts['ayah']['use'] = false;
+		if (!isset($this->opts['ayah']['publisher_key']))	$this->opts['ayah']['publisher_key'] = '';
+		if (!isset($this->opts['ayah']['scoring_key']))		$this->opts['ayah']['scoring_key'] = '';
+		
+		?>
 		<fieldset class="antispam recaptcha">
 		  <legend>Are You A Human?</legend>
 			<p class="tick"><label>
@@ -716,6 +748,9 @@ abstract class TailoredForm {
 		wp_enqueue_script('jquery-ui-datepicker');
 		wp_enqueue_style('ui-datepicker', '//ajax.googleapis.com/ajax/libs/jqueryui/1.7.2/themes/ui-lightness/jquery-ui.css');
 		add_action('admin_print_footer_scripts', array($this,'admin_graph_js'));
+		
+		if (!isset($_REQUEST['date_from']))		$_REQUEST['date_from'] = '';
+		if (!isset($_REQUEST['date_to']))		$_REQUEST['date_to'] = '';
 		
 		if ($_REQUEST['date_from']) {	$_REQUEST['date_from'] = date('M j, Y', strtotime( $_REQUEST['date_from'] ));	}
 		if ($_REQUEST['date_to']) {	$_REQUEST['date_to'] = date('M j, Y', strtotime( $_REQUEST['date_to'] ));	}
@@ -812,7 +847,7 @@ function drawChart() {
 	function admin_list_logs() {
 		$class_name = $this->log_type.'_Table';
 		if (!class_exists($class_name))	return;
-		$per_page = (is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
+		$per_page = (isset($_GET['per_page']) && is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
 		$table = new $class_name( $this->log_type, $per_page );
 		$table->prepare_items();
 		?>
@@ -831,10 +866,11 @@ function drawChart() {
 	 *	Take our logs, and convert to CSV file
 	 */
 	function output_csv_logs() {
-		if (!$this->log_type)				return false;
-		if (!$_GET['download'] == 'csv')	return false;
-			$logs = $this->admin_csv_logs();
-			if (!$logs)						return false;
+		if (!$this->log_type)											return false;
+		if (!isset($_GET['download']) || !$_GET['download'] == 'csv')	return false;
+		if (!$this->questions)											return false;
+		$logs = $this->admin_csv_logs();
+		if (!$logs)														return false;
 		header("Content-type: application/csv");
 		header("Content-Disposition: attachment; filename=log.csv");
 		echo $logs;
@@ -888,7 +924,7 @@ function drawChart() {
 	/**
 	 *	Helper: format a timestamp
 	 */
-	function format_time_ago($timestamp) {
+	public static function format_time_ago($timestamp) {
 		if (!is_numeric($timestamp)) $timestamp = strtotime($timestamp);
 		$t_diff = time() - $timestamp;
 		if (abs($t_diff < 86400)) {	// 24 hours
@@ -903,7 +939,7 @@ function drawChart() {
 	/**
 	 *	Helper to fix the "Error at offset" issue
 	 */
-	function __unserialize($data) {
+	public static function __unserialize($data) {
 		// First attempt json_decode
 		$decoded = json_decode($data);
 		if ($decoded)	return (array) $decoded;
