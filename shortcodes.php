@@ -41,15 +41,16 @@ class TailoredTools_Shortcodes {
 	/**
 	 *	Shortcode:  [tabs] for jQuery UI Tabs
 	 *	Javascript does the heavy lifting
-	 *	Revised this to use DOMDocument instead of str_replace, to allow for <h2 id="something">
+	 *	Revised this to use SmartDOMDocument instead of str_replace, to allow for <h2 id="something">
 	 */
 	function shortcode_ui_tabs($atts=false, $content=null) {
+		if (!class_exists('SmartDOMDocument'))	require_once('lib/class.smartdomdocument.php');
 		// Strip start and end <p> tags to avoid broken HTML
 		if (substr($content, 0, 4)=='</p>')	$content = substr($content, 4);
 		if (substr($content, -3, 3)=='<p>')	$content = substr($content, 0, -3);
 		$content = trim($content);
 		
-		$dom = new DOMDocument();
+		$dom = new SmartDOMDocument();
 		$dom->loadHTML( $content );
 		// Loop H2 and wrap
 		$nodes = $dom->getElementsByTagName('h2');
@@ -65,16 +66,11 @@ class TailoredTools_Shortcodes {
 				$h->parentNode->appendChild($div);
 			}
 		}
-		// Now go through and remove empty tags
-		$allowed_nodes = array( 'param', 'embed', 'iframe', 'div', 'object' );
-		$xp = new DOMXPath($dom);
-		foreach($xp->query('//*[not(node() or self::br) or normalize-space() = ""]') as $node) {
-			if (in_array($node->tagName, $allowed_nodes))	continue;
-			$node->parentNode->removeChild($node);	// For some reason, this breaks on iFrames and some other elements.  Dodge by $allowed_nodes
-		}
 		
-		$output = preg_replace('~<(?:!DOCTYPE|/?(?:html|body))[^>]*>\s*~i', '', $dom->saveHTML());
+		$output = $dom->saveHTMLExact();
 		$output = '<div class="ui_tabs">'."\n".do_shortcode($output)."\n".'</div>'."\n";
+		// Try this to remove empty paragraphs
+		$output = str_replace(array('<p></p>', '<p>&nbsp;</p>'), '', $output);
 		// Fix some strange HTML
 		$output = str_replace('<p><form', '<form', $output);
 		$output = str_replace('</form></p>', '</form>', $output);
@@ -83,6 +79,7 @@ class TailoredTools_Shortcodes {
 		wp_enqueue_script('jquery-ui-tabs');
 		return $output;
 	}
+	
 	
 
 	/**

@@ -286,8 +286,9 @@ abstract class TailoredForm {
 	function validate_question($key, $q) {
 		if (!$q['required'])		return;
 		if ($q['type'] != 'file') {
-			if (!isset($_POST[$key]) || trim($_POST[$key])=='')								$this->error[] = $q['error'];
-			if ($q['type'] == 'email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
+//			if (!isset($_POST[$key]) || trim($_POST[$key])=='')								$this->error[] = $q['error'];
+			if (!isset($_POST[$key]) || (!is_array($_POST[$key]) && trim($_POST[$key])==''))	$this->error[] = $q['error'];
+			if ($q['type']=='email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
 		} else
 		if ($q['type'] == 'file') {
 			if (!isset($_FILES[$key]) || $_FILES[$key]['error'] != '0')	$this->error[] = $q['error'];

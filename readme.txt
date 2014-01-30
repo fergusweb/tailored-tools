@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.7
-Stable tag:			1.7.4
+Tested up to:		3.8.1
+Stable tag:			1.7.6
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,11 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+= 1.7.6 =
+* Noticed a problem with [tabs] shortcode not including some image elements. Now resolved, plus added a filter for allowed tags (tailored_tools_ui_tabs_allowed_nodes)
+
+= 1.7.5 =
+* We were trim()ing a _POST value without checking if it was an array.  Caused issues on at least one client.  Now fixed (checking if array before trim).
 
 = 1.7.4 =
 * New shortcode handler for [tabs] had an issue with iframes and other elements. Now corrected.
