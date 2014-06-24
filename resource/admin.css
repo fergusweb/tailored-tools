@@ -17,3 +17,5 @@ table.widefat { margin:1em 0 1.5em; }
 table.widefat th input.button-primary { font-family:Arial, Helvetica, sans-serif; padding:0.2em 0.7em; }
 table.widefat .ctrl { width:2em; text-align:center; }
 table.widefat .date { width:10em; }
+
+.mce-toolbar .mce-i-tailored_tools:before { content:url(mce-icon.gif); }

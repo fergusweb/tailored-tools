@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		3.8.1
-Stable tag:			1.7.6
+Stable tag:			1.7.7
 
 Contains some helper classes to help you build custom forms.
 
@@ -53,6 +53,10 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 
 == Changelog ==
+= 1.7.7 =
+* Changed the function that handles file-uploads for relevant questions.  Previously, file-upload questions within fieldsets would not be included.
+* Preserve new-line characters in json_encode function when logging entries
+
 = 1.7.6 =
 * Noticed a problem with [tabs] shortcode not including some image elements. Now resolved, plus added a filter for allowed tags (tailored_tools_ui_tabs_allowed_nodes)
 

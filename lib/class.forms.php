@@ -113,11 +113,19 @@ abstract class TailoredForm {
 	}
 	
 	
+	
 	/**
 	 *	Log form submission as a custom post-type
 	 */
 	function log_form($data=false) {
 		if (!$this->log_type || !data || empty($data))		return false;
+		// Preserve new-lines through json_encode
+		if (is_array($data)) {
+			foreach ($data as $key => $line) {
+				if (strpos($data[$key], "\n")!==false)		$data[$key] = str_replace(array("\r\n", "\r", "\n"), "\\n", $data[$key]);
+			}
+		}
+		// Insert into DB
 		$insertID = wp_insert_post(array(
 			'post_title'	=> '',
 			'post_content'	=> json_encode($data),
@@ -145,9 +153,28 @@ abstract class TailoredForm {
 	}
 	
 	
+	
 	/**
 	 *	Process upload & prepare attachments
+	 *	Original function doesn't work for file questions inside fieldsets.  This one is recursive.
 	 */
+	function process_upload($questions=false) {
+		if (!$questions) {
+			return $this->process_upload( $this->questions );
+		}
+		$dir = wp_upload_dir();
+		foreach ($questions as $key => $q) {
+			if ($q['type'] == 'fieldset')	$this->process_upload( $questions[$key]['questions'] );
+			if ($q['type'] != 'file')		continue;
+			$upload = $dir['basedir'].'/'.$_FILES[$key]['name'];
+			if (!move_uploaded_file($_FILES[$key]['tmp_name'], $upload))	continue;
+			$this->files[] = $upload;
+		}
+	}
+	
+	/**
+	 *	Process upload & prepare attachments
+	 *
 	function process_upload() {
 		$dir = wp_upload_dir();
 		foreach ($this->questions as $key => $q) {
@@ -594,7 +621,8 @@ abstract class TailoredForm {
 			if ($count && $count->private>0)	$counter = '<span class="update-plugins"><span class="update-count">'. $count->private .'</span></span>';
 		}
 		$hook = add_submenu_page($this->admin_menu, $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array(&$this,'admin_page'));
-		add_action("load-$hook", array(&$this,'admin_enqueue'));
+//		add_action("load-$hook", array(&$this,'admin_enqueue'));
+		add_action('admin_enqueue_scripts', array($this,'admin_enqueue'));
 	}
 	
 	function admin_enqueue() {
