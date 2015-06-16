@@ -22,8 +22,11 @@ jQuery(document).ready(function($){
 jQuery(document).ready(function($){
 	if ($('form.validate').length < 1)		return; 
 	if (!$().validate)						return;
+	$('form.validate .required').each(function(i) {
+		$(this).attr('required',true);
+	});
 	$('form.validate').each(function(i) {
-		$(this).validate();
+//		$(this).validate();
 	});
 });
 
@@ -34,6 +37,7 @@ jQuery(document).ready(function($){
 jQuery(function($) {
 	if ($('form .datepicker').length < 1)	return;
 	if (!$().datepicker)					return;
+	$('form input.datepicker, form p.datepicker input').attr('type', 'text');
 	$('form input.datepicker, form p.datepicker input').datepicker({
 		dateFormat:		'dd/mm/yy',
 		changeMonth:	true,
@@ -47,6 +51,7 @@ jQuery(function($) {
 jQuery(function($) {
 	if ($('form .timepicker').length < 1)	return;
 	if (!$().timepicker)					return;
+	$('form input.timepicker, form p.timepicker input').attr('type', 'text');
 	$('form input.timepicker, form p.timepicker input').timepicker({
 		timeFormat:		'h:mm tt',
 		stepMinute:		15,
@@ -61,6 +66,7 @@ jQuery(function($) {
 jQuery(function($) {
 	if ($('form .datetimepicker').length < 1)	return;
 	if (!$().datetimepicker)					return;
+	$('form input.datetimepicker, form p.datetimepicker input').attr('type', 'text');
 	$('form input.datetimepicker, form p.datetimepicker input').datetimepicker({
 		changeMonth:	true,
 		changeYear:		true,
@@ -94,19 +100,6 @@ jQuery(function($) {
 });
 
 
-/**
- *	Autoload Chosen script select fields with more than 3 options
- */
-jQuery(function($) {
-	if ($('form p label select').length < 1)	return;
-	if (!$().chosen)							return;
-	$('form p label select').each(function(i) {
-		if ($(this).parent().parent().hasClass('nochosen'))	return true;
-		if ($(this).find('option').length > 3) {
-			$(this).chosen();
-		}
-	});
-});
 
 
 /**

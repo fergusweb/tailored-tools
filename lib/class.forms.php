@@ -13,9 +13,8 @@ abstract class TailoredForm {
 	public	$error, $success	= false;
 	public		$debug			= false;
 	// Which anti-spam modules are available?
-	public		$avail_recaptcha= false;
+	public		$avail_recaptcha= true;
 	public		$avail_akismet	= false;
-	public		$avail_ayah		= false;
 	public		$check_bad_words= true;				// Turn this on child-classes to enable check.
 	// Customise these in child-class
 	public		$nonce			= 'tailored-tools';
@@ -56,7 +55,28 @@ abstract class TailoredForm {
 		if (!$options) { $options = $this->opts; }
 		update_option($this->option_key, $options);
 	}
-	abstract function default_options();
+	function default_options() {
+		$this->opts = array(
+			'email' => array(
+				'from'		=> get_bloginfo('admin_email'),
+				'to'		=> get_bloginfo('admin_email'),
+				'bcc'		=> '',
+				'subject'	=> 'TWS Form for '.site_url(),
+			),
+			'success' => array(
+				'message'	=> 'Thank you, your message has been sent.',
+				'redirect'	=> '',
+			),
+			'failure'	=> array(
+				'message'	=> 'Sorry, your message could not be sent at this time.',
+			),
+			'recaptcha'	=> array(
+				'use'		=> false,
+				'public'	=> '',
+				'private'	=> '',
+			),
+		);
+	}
 
 
 	
@@ -94,7 +114,7 @@ abstract class TailoredForm {
 	 */
 	function enqueue_scripts() {
 		wp_enqueue_script('ttools-loader');
-		wp_enqueue_style('jquery-chosen');
+		wp_enqueue_style('jquery-select2');
 		wp_enqueue_style('ttools');
 	}
 	
@@ -142,11 +162,10 @@ abstract class TailoredForm {
 	function filter_headers($headers=false, $form=false) {
 		// Only run for specific form
 		if ($this->form_name !== $form->form_name)	return $headers;
-		// By default, we send "from" the WordPress blog & admin email.
 		// Over-ride this function to send from customer details.
 		$headers = array(
-			'From: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>',
-			'Reply-To: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>',
+			'From: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>',			// From should be an email address at this domain.
+			'Reply-To: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>',		// Reply-to and -path should be visitor email.
 			'Return-Path: '.get_bloginfo('name').' <'.get_bloginfo('admin_email').'>',
 		);
 		return $headers;
@@ -193,6 +212,7 @@ abstract class TailoredForm {
 		foreach ($this->questions as $key => $q) {
 			$message .= $this->build_message_line($formdata, $key, $q);
 		}
+		$message .= " \r\n \r\n".'From page: '.get_permalink()." \r\n";
 		return $message;
 	}
 	
@@ -638,6 +658,7 @@ abstract class TailoredForm {
 			$_POST = stripslashes_deep($_POST);
 			//echo '<pre>'; print_r($_POST); echo '</pre>';
 			$this->opts['email'] = array_merge((array)$this->opts['email'], array(
+				'from'		=> $_POST['email']['from'],
 				'to'		=> $_POST['email']['to'],
 				'bcc'		=> $_POST['email']['bcc'],
 				'subject'	=> $_POST['email']['subject'],
@@ -658,15 +679,20 @@ abstract class TailoredForm {
 				'use'		=> ((isset($_POST['akismet']['use']) && $_POST['akismet']['use'] == 'yes') ? true : false),
 				'api_key'	=> ((isset($_POST['akismet']['api_key'])) ? $_POST['akismet']['api_key'] : ''),
 			));
+/*
 			$this->opts['ayah'] = array_merge((array)$this->opts['recaptcha'], array(
 				'use'			=> ((isset($_POST['ayah']['use']) && $_POST['ayah']['use'] == 'yes') ? true : false),
 				'publisher_key'	=> ((isset($_POST['ayah']['publisher_key'])) ? $_POST['ayah']['publisher_key'] : ''),
 				'scoring_key'	=> ((isset($_POST['ayah']['scoring_key'])) ? $_POST['ayah']['scoring_key'] : ''),
 			));
-			
+*/
 			$this->save_options();
 			echo '<div class="updated"><p>Settings have been saved.</p></div>'."\n";
 		}
+		
+		// Default
+		if (!isset($this->opts['email']['from']))	$this->opts['email']['from'] = get_bloginfo('admin_email');
+		
 		// Show graph
 		if ($this->log_type)	$this->admin_graph_logs();
 		// Show & Save logged submissions
@@ -681,23 +707,41 @@ abstract class TailoredForm {
 		<div class="column column_left">
 		<fieldset>
 		  <legend>Email Options</legend>
-			<p><label for="emailTo">Email notifications to:</label>
-				<input type="text" name="email[to]" id="emailTo" class="widefat" value="<?php echo $this->opts['email']['to']; ?>" /></p>
-			<p><label for="emailBCC">BCC notifications to:</label>
-				<input type="text" name="email[bcc]" id="emailBCC" class="widefat" value="<?php echo $this->opts['email']['bcc']; ?>" /></p>
-			<p><label for="emailSubject">Email Subject Line:</label>
-				<input type="text" name="email[subject]" id="emailSubject" class="widefat" value="<?php echo $this->opts['email']['subject']; ?>" /></p>
-			<p class="note">If you leave the "Thank-you URL" blank, the "Thank-you Message" will be shown instead.
-							If you provide a URL, the user will be redirected to that page when they successfully send a message.</p>
+		  	<p><label>
+				<span>Email notifications to:</span>
+				<input type="text" name="email[to]" class="widefat" value="<?php echo $this->opts['email']['to']; ?>" />
+			</label></p>
+			<p><label>
+				<span>BCC notifications to:</span>
+				<input type="text" name="email[bcc]" class="widefat" value="<?php echo $this->opts['email']['bcc']; ?>" />
+			</label></p>
+			<p><label>
+				<span>Email Subject Line:</span>
+				<input type="text" name="email[subject]" class="widefat" value="<?php echo $this->opts['email']['subject']; ?>" />
+			</label></p>
+		  	<p><label>
+				<span>Sending email from:</span>
+				<input type="text" name="email[from]" class="widefat" value="<?php echo $this->opts['email']['from']; ?>" />
+			</label></p>
 		</fieldset>
 		<fieldset>
 		  <legend>Response Options</legend>
-			<p><label for="thanksURL">Thank-you URL:</label>
-				<input name="success[url]" type="text" class="widefat" id="thanksURL" value="<?php echo $this->opts['success']['redirect']; ?>" /></p>
-			<p><label for="successMsg">Thank-you Message:</label>
-				<textarea name="success[msg]" class="widefat" id="successMsg"><?php echo $this->opts['success']['message']; ?></textarea></p>
-			<p><label for="failMsg">Error Message:</label>
-				<textarea name="failure[msg]" class="widefat" id="failMsg"><?php echo $this->opts['failure']['message']; ?></textarea></p>
+			<p><label>
+				<span>Thank-you URL:</span>
+				<input name="success[url]" type="text" class="widefat" value="<?php echo $this->opts['success']['redirect']; ?>" />
+			</label></p>
+			<p class="note">
+				If you leave the "Thank-you URL" blank, the "Thank-you Message" will be shown instead.<br />
+				If you provide a URL, the user will be redirected to that page when they successfully send a message.
+			</p>
+			<p><label>
+				<span>Thank-you Message:</span>
+				<textarea name="success[msg]" class="widefat"><?php echo $this->opts['success']['message']; ?></textarea>
+			</label></p>
+			<p><label>
+				<span>Error Message:</span>
+				<textarea name="failure[msg]" class="widefat"><?php echo $this->opts['failure']['message']; ?></textarea>
+			</label></p>
 		</fieldset>
 		</div><!-- left column -->
 		<div class="column column_right">
@@ -710,16 +754,20 @@ abstract class TailoredForm {
 		?>
 		<fieldset class="antispam recaptcha">
 		  <legend>reCAPTCHA</legend>
-			<p class="tick"><label>
-				<input name="recaptcha[use]" type="checkbox" value="yes" <?php echo ($this->opts['recaptcha']['use']) ? 'checked="checked"' : ''; ?> /> 
-				Use reCPATCHA?</label>
-				&nbsp; &nbsp; &nbsp; &nbsp; <a href="https://www.google.com/recaptcha/admin/create" target="_blank">Get API Keys</a></p>
+		  	<p class="tick">
+				<label>
+					<input name="recaptcha[use]" type="checkbox" value="yes" <?php echo ($this->opts['recaptcha']['use']) ? 'checked="checked"' : ''; ?> /> 
+					Use reCPATCHA?
+				</label>
+				<a href="https://www.google.com/recaptcha/admin" target="_blank">Get API Keys</a>
+			</p>
 			<p><label><span>Public Key:</span>
 				<input name="recaptcha[public]" type="text" value="<?php echo $this->opts['recaptcha']['public']; ?>" /></label></p>
 			<p><label><span>Private Key:</span>
 				<input name="recaptcha[private]" type="text" value="<?php echo $this->opts['recaptcha']['private']; ?>" /></label></p>
 		</fieldset>
 		<?php	}								?>
+		
 		<?php	if ($this->avail_akismet) {		?>
 		<?php
 		if (!isset($this->opts['akismet']['use']))		$this->opts['akismet']['use'] = false;
@@ -727,35 +775,20 @@ abstract class TailoredForm {
 		?>
 		<fieldset class="antispam akismet">
 			<legend>Akismet Anti-Spam</legend>
-			<p class="tick"><label>
-				<input name="akismet[use]" type="checkbox" value="yes" <?php echo ($this->opts['akismet']['use']) ? 'checked="checked"' : ''; ?> /> 
-				Use Akismet?</label>
-				&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="https://akismet.com/signup/" target="_blank">Get API Key</a></p>
-			<p><label><span>Public Key:</span>
-				<input name="akismet[api_key]" type="text" value="<?php echo $this->opts['akismet']['api_key']; ?>" /></label></p>
+		  	<p class="tick">
+				<label>
+					<input name="akismet[use]" type="checkbox" value="yes" <?php echo ($this->opts['akismet']['use']) ? 'checked="checked"' : ''; ?> /> 
+					Use Akismet?
+				</label>
+				<a href="https://akismet.com/signup/" target="_blank">Get API Key</a>
+			</p>
+			<p><label>
+				<span>Public Key:</span>
+				<input name="akismet[api_key]" type="text" value="<?php echo $this->opts['akismet']['api_key']; ?>" />
+			</label></p>
 		</fieldset>
 		<?php	}								?>
-		<?php	if ($this->avail_ayah) {		?>
-		<?php
-		if (!isset($this->opts['ayah']['use']))				$this->opts['ayah']['use'] = false;
-		if (!isset($this->opts['ayah']['publisher_key']))	$this->opts['ayah']['publisher_key'] = '';
-		if (!isset($this->opts['ayah']['scoring_key']))		$this->opts['ayah']['scoring_key'] = '';
 		
-		?>
-		<fieldset class="antispam recaptcha">
-		  <legend>Are You A Human?</legend>
-			<p class="tick"><label>
-				<input name="ayah[use]" type="checkbox" value="yes" <?php echo ($this->opts['ayah']['use']) ? 'checked="checked"' : ''; ?> /> 
-				Use AYAH Service?</label>
-				&nbsp; &nbsp; &nbsp; &nbsp; <a href="http://portal.areyouahuman.com/dashboard/add_site" target="_blank">Get API Keys</a></p>
-			<p class="note">NOTE: Strongly suggest you set your "Game Style" to "Embedded" for best results.</p>
-			<p><label><span>Publisher Key:</span>
-				<input name="ayah[publisher_key]" type="text" value="<?php echo $this->opts['ayah']['publisher_key']; ?>" /></label></p>
-			<p><label><span>Scoring Key:</span>
-				<input name="ayah[scoring_key]" type="text" value="<?php echo $this->opts['ayah']['scoring_key']; ?>" /></label></p>
-		</fieldset>
-		<?php	}								?>
-		<p class="note">Note: Use only one of these anti-spam methods!</p>
 		</div><!-- right column -->
 
         <p style="text-align:center; clear:both;"><input class="button-primary" type="submit" value="Save Settings" name="SaveSettings" /></p>
@@ -874,11 +907,12 @@ function drawChart() {
 	 *	Name should be:  "{$this->log_type}_Table"
 	 */
 	function admin_list_logs() {
-		$class_name = $this->log_type.'_Table';
-		if (!class_exists($class_name))	return;
+		
+		if (!$this->log_type)	return false;
+		
 		$per_page = (isset($_GET['per_page']) && is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
-		$table = new $class_name( $this->log_type, $per_page );
-		$table->prepare_items();
+		$table = new tws_form_log_Table();
+		$table->prepare_items($this->log_type, $per_page);
 		?>
         <form id="enquiries" method="post">
             <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
@@ -978,6 +1012,122 @@ function drawChart() {
 	}
 	
 	
+}
+
+
+
+
+
+
+
+/**
+ *	This is used in the admin area to display logged enquiries
+ */
+if (is_admin()) {
+	if (!class_exists('tws_WP_List_Table'))			require( dirname(__FILE__).'/class-wp-list-table.php' );
+
+	class tws_form_log_Table extends tws_WP_List_Table {
+		
+/*
+		function __construct() { //$post_type='', $per_page=20) {
+//			echo "<p>Post Type: $post_type <br />Per Page: $per_page</p>";
+//			$this->post_type = $post_type;
+//			$this->per_page = $per_page;
+			parent::__construct(array(
+				'singular'	=> 'enquiry',
+				'plural'	=> 'enquiries',
+				'ajax'		=> false,
+			));
+		}
+*/
+	
+		function get_columns() {
+			return array(
+				'cb'			=> '<input type="checkbox" />',
+				'date'			=> __('Date'), //array( 'date', true ),
+				'cust_name'		=> __('Name'),
+				'cust_email'	=> __('Email'),
+				'cust_phone'	=> __('Phone'),
+			);
+		}
+		
+		function get_bulk_actions() {
+			return array(
+				'delete'    => 'Delete'
+			);
+		} 
+		
+		function process_bulk_action() {
+			if ('delete' === $this->current_action()) {
+				foreach ($_POST['records'] as $delete_id) {
+					wp_delete_post($delete_id, true);
+				}
+				echo '<div class="updated"><p>Selected logs have been deleted.</p></div>'."\n";
+			}
+		} 
+		
+		function prepare_items( $post_type='', $per_page=20 ) {
+//			$this->post_type = $post_type;
+//			$this->per_page = $per_page;
+
+//			$per_page = $this->per_page;
+			$columns = $this->get_columns();
+			$hidden = array();
+			$sortable = $this->get_sortable_columns(); 
+			$this->_column_headers = array($columns, $hidden, $sortable); 
+			
+			$this->process_bulk_action(); 
+			
+//			echo '<p>Getting posts - type = '.$post_type.'<br />Per page: '.$per_page.'</p>';
+			
+			$posts = get_posts(array(
+				'numberposts'	=> -1,
+				'post_type'		=> $post_type, //$this->post_type,
+				'post_status'	=> 'all',
+			));
+			
+			$current_page = $this->get_pagenum(); 
+			
+			$total_items = count($posts); 
+			
+			$this->items = array_slice($posts,(($current_page-1)*$per_page),$per_page);
+			
+			$this->set_pagination_args( array(
+				'total_items' => $total_items,                  //WE have to calculate the total number of items
+				'per_page'    => $per_page,                     //WE have to determine how many items to show on a page
+				'total_pages' => ceil($total_items/$per_page)   //WE have to calculate the total number of pages
+			) );
+			
+		}
+		
+		function display_rows() {
+			if (empty($this->items))	return false;
+			$records = $this->items;
+			list($columns, $hidden) = $this->get_column_info();
+			foreach ($records as $record) {
+				$form = TailoredForm::__unserialize($record->post_content);
+				echo '<tr>'."\n";
+				foreach ($columns as $column_name => $column_label) {
+					switch ($column_name) {
+						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.$record->ID.'" /></th>';	break;
+						case 'date':		echo '<td rowspan="2">'.TailoredForm::format_time_ago( strtotime($record->post_date) ).'</td>';						break;
+						case 'cust_name':	echo '<td>'.$form['cust_name'].'</td>';			break;
+						case 'cust_email':	echo '<td>'.$form['cust_email'].'</td>';		break;
+						case 'cust_phone':	echo '<td>'.$form['cust_phone'].'</td>';		break;
+					}
+				}
+				echo '</tr>'."\n";
+				echo '<tr class="more">';
+				echo '<td colspan="3">';
+				echo 	'<p>'.nl2br($form['cust_message']).'</p>';
+				echo 	'<p>Viewing: <a target="_blank" href="'.$form['Viewing'].'">'.$form['Viewing'].'</a></p>';
+				echo '</td>';
+				echo '</tr>';
+			}
+		}
+		
+	}
+
 }
 
 

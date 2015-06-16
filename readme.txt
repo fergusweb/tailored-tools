@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		3.8.1
-Stable tag:			1.7.7
+Tested up to:		4.2.2
+Stable tag:			1.8.1
 
 Contains some helper classes to help you build custom forms.
 
@@ -52,7 +52,26 @@ Sometimes you need to include the same bit of content in many places on your sit
 To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.  This will embed both the iFrame and a static image.  Use CSS to determine which one is shown.  Use CSS media queries for responsive behavior here.
 
 
+== Upgrade Notice ==
+
+= 1.8.0 =
+This is a major upgrade, featuring improved anti-spam options and style changes.  You should check your theme after this upgrade.  Some clients will need manual tweaking.
+
+
 == Changelog ==
+= 1.8.1 =
+* Released just to bump the version number.
+
+= 1.8.0 =
+* Tested with WordPress 4.2.2
+* Update enqueued script versions
+* Remove the Chosen script (you can add this to your theme or another plugin if you need it)
+* Fix minor bugs
+* Contact form now offers Google's "[No CAPTCHA reCAPTCHA](https://www.google.com/recaptcha/)" 
+* Change contact form headers (Only REPLY header is set to visitor.  FROM defaults to admin_email setting.  Will hopefully help avoid spam filters.)
+* Change Maps embed default width to 1000px
+* Include a copy of WP_List_Table class, to avoid issues if core file changes in future. 
+
 = 1.7.7 =
 * Changed the function that handles file-uploads for relevant questions.  Previously, file-upload questions within fieldsets would not be included.
 * Preserve new-line characters in json_encode function when logging entries
@@ -73,7 +92,7 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 * Allow a default of 0 on form inputs, and allow a supplied "0" value to pass server-side validation
 
 = 1.7.3 = 
-* Update how the [tabs] shortcode is parsed & handled to allow for <h2 class="something"> attributes
+* Update how the [tabs] shortcode is parsed & handled to allow for &lt;H2 class="something"> attributes
 * Update the related JS to handle new format, and to allow for <a href="#something"> triggers
 
 = 1.7.2 = 
@@ -83,10 +102,10 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 = 1.7.1 = 
 * Fix a stylesheet problem with jquery-chosen
 
-= 1.7 =
+= 1.7.0 =
 * Now including a graph before displaying logs in admin area, to show leads over time.
 
-= 1.6 =
+= 1.6.0 =
 * SVN Commit for 1.5.4 didn't include all updates.
 * Genesis 2.0+ has an "embed scripts" meta box.  So if box is empty and running 2.0 plus, disable our metabox.
 * Change ' to " in shortcodes.php (personal preference)

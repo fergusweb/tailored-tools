@@ -2,7 +2,55 @@
 /**
  *	Form Helpers
  */
+form.tws { max-width:100%; margin:0 auto 1.5em; }
+form.tws:after { content:""; clear:both; display:table; }
+form.tws p { margin-bottom:1em; }
+form.tws p:last-child { margin-bottom:0; }
+form.tws p.note { font-style:italic; }
 
+form.tws p label { display:block; cursor:pointer; }
+form.tws p label span { display:inline-block; font-size:0.9em; }
+form.tws p label .txt { border:1px solid rgba(0,0,0,0.2); border-radius:0.25em; padding:0.3em; }
+form.tws p label .txt:focus { border-color:rgba(0,0,0,0.3); box-shadow:1px 1px 1px rgba(0,0,0,0.1); }
+
+form.tws p label input[type=range] { border:0; padding:0; box-shadow:none !important; }
+form.tws p label input[type=file] { border:0; cursor:pointer; padding:0; }
+
+form.tws p.radio { }
+form.tws p.radio span.label { }
+form.tws p.radio label { padding:0.3em 0 0; }
+form.tws p.radio label input { margin:0 0.5em 0 0.75em; }
+
+form.tws p label input.datepicker { }
+form.tws p label input.hasDatepicker { background-image:url(calendar.png); background-position:right 5px center; background-repeat:no-repeat; cursor:pointer; width:10em; }
+form.tws p label input.datetimepicker { width:14em; }
+form.tws p label input.timepicker.hasDatepicker { background-image:url(time.png); }
+
+form.tws p.submit { text-align:center; }
+form.tws p.submit input { }
+form.tws p.submit input:hover { }
+
+form.tws fieldset { margin:0 0 1em 0; }
+form.tws fieldset legend { margin:0 0.3em; padding:0 0.5em; font-weight:bold; }
+
+
+@media only screen and (min-width: 600px) {
+	form.tws p label span { display:inline-block; width:20%; max-width:100%; min-width:8em; vertical-align:top; font-size:1em; }
+	form.tws p label .txt { width:74%; }
+}
+
+/**
+ *	Errors & Validation
+ */
+form.tws .g-recaptcha { text-align:center; margin-bottom:1em; }
+form.tws .g-recaptcha > div > div { margin:0 auto; }
+
+p.error, p.success	{ padding:0.8em 1.1em; border-radius:0.3em; }
+p.error				{ border:1px solid #900; background:#fdfafa url(exclaim.gif) top right no-repeat;; }
+p.success			{ border:1px solid #060; background:#f2f7f2; }
+
+
+/*
 form.tws { max-width:95%; margin:0 auto 2rem; }
 form.tws p { margin:0; padding:0 0 1rem; clear:both; }
 
@@ -47,7 +95,7 @@ form.tws p.submit input:hover { background:#373737; box-shadow:inset 0 0 1.5rem 
 
 /**
  *	Form Validation
- */
+ *
 p.error, p.success	{ padding:0.8em 1.1em; border-radius:0.3em; }
 p.error				{ border:1px solid #900; background:#fdfafa url(exclaim.gif) top right no-repeat;; }
 p.success			{ border:1px solid #060; background:#f2f7f2; }
@@ -59,7 +107,7 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 
 /**
  *	Responsive for smaller screens
- */
+ *
 @media only screen and (max-width: 600px) {
 	form.tws p label span, form.tws p.wide label span { width:auto; float:none; }
 	form.tws p label .txt, form.tws p.wide label .txt { width:100%; }
@@ -107,8 +155,8 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 .ui-timepicker-rtl dl { text-align: right; }
 .ui-timepicker-rtl dl dd { margin: 0 65px 10px 10px; }
 
-.ui-timepicker-div { border-top:1px solid #CCC; margin-top:3px; padding-top:5px; }
-.ui-timepicker-div select { color:#333; }
+.ui-timepicker-div { border-top:1px solid #CCC; margin-top:3px; padding-top:5px; border-top:0; }
+.ui-timepicker-div select { color:#333; padding:0 0.2em; cursor:pointer; }
 .ui-datepicker-buttonpane { text-align:center; }
 .ui-datepicker-buttonpane button { padding:0.5em 1em; margin:0 0.3em; border-radius:0.5em; }
 
@@ -117,31 +165,39 @@ form.tws .error, form.tws .error:focus { border-color:#900; background-color:#FD
 /**
  *	jQuery UI Tabs
  */
-.ui-tabs { margin:0.5em 0 1.5em; }
-.ui-tabs .ui-tabs-panel { clear:both; border:1px solid #EEE; background:#FFF; border-top:3px solid #d2232a; padding:1px; }
-.ui-tabs .ui-tabs-hide { display:none; }
-.ui-tabs .ui-tabs-nav:after { clear:both; content:"."; display:block; height:0; visibility:hidden; }
-.ui-tabs .ui-tabs-nav { margin:0; padding:0; width:100%; background:none; padding-top:10px; }
-.ui-tabs .ui-tabs-nav li { display:inline; margin:0; padding:0; }
-.ui-tabs .ui-tabs-nav li a { display:block; float:left; text-decoration:none; padding:0.5em 0.9em; margin:0 3px 0 0; 
-							color:#626060; background:#d7d6d6; border-radius:0.4em 0.4em 0 0; }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected {  }
-.ui-tabs .ui-tabs-nav li.ui-tabs-selected a { color:#FFF; background:#d2232a; }
-.ui-tabs .ui-tabs-nav { border-radius:0.4em 0.4em 0 0; }
-.ui-tabs .tab_panel { padding:0.5em 0.8em; border-radius:0 0 0.4em 0.4em; }
-.ui-tabs .tab_panel h1, .format_text .ui-tabs .tab_panel h2 { display:none; }
-.ui-tabs .tab_panel:after { clear:both; content:"."; display:block; height:0; visibility:hidden; }
+.ui-tabs:after, .ui-tabs .ui-tabs-nav:after, .ui-tabs .ui-tabs-panel:after { content:""; clear:both; display:table; }
+
+.ui-tabs { }
+.ui-tabs .ui-tabs-nav { margin:0; padding:0; padding-top:10px; }
+.ui-tabs .ui-tabs-nav li { list-style:none; display:inline; margin:0; padding:0; }
+.ui-tabs .ui-tabs-nav li a { display:block; float:left; padding:0.5em 0.9em; margin-right:3px; border-radius:0.4em 0.4em 0 0; color:#626060; background:#d7d6d6; }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active { }
+.ui-tabs .ui-tabs-nav li.ui-tabs-active a { color:#FFF; background:#7f05a5; }
+.ui-tabs .ui-tabs-panel { clear:both; margin-bottom:1.5em; }
+.ui-tabs .ui-tabs-panel > :last-child { margin-bottom:0; }
+
+@media only screen and (max-width:500px) {
+	.ui-tabs .ui-tabs-nav { display:none; }
+	.ui-tabs .ui-tabs-panel { display:block !important; }
+}
+@media only screen and (min-width:500px) {
+	.ui-tabs { }
+	.ui-tabs .ui-tabs-nav { display:block; }
+	.ui-tabs .ui-tabs-panel { padding:0.5em 0.8em; border:1px solid #EEE; border-radius:0 0 0.4em 0.4em; border-top:4px solid #7f05a5; }
+	.ui-tabs .ui-tabs-panel h1, .ui-tabs .ui-tabs-panel h2 { display:none; }
+}
 
 
 
 /**
  *	Responsive map embed
  */
+.googlemap { margin:0 0 1.5em 0; }
 .googlemap img, 
-.googlemap iframe { background:#FFF; border:1px solid #DDD; padding:2px; border-radius:10px; box-shadow:1px 1px 2px #DDD; margin:10px auto 15px; max-width:100%;  }
-.googlemap img { max-width:95%; height:auto; display:block; }
+.googlemap iframe { background:#FFF; border:1px solid #DDD; padding:1px; border-radius:10px; box-shadow:1px 1px 2px rgba(0,0,0,0.2); margin:10px auto 15px; max-width:100%;  }
+.googlemap img { max-width:100%; height:auto; display:block; }
 .googlemap iframe { display:none; }
 @media only screen and (min-width:500px) {
 	.googlemap img { display:none; }
-	.googlemap iframe { display:block; max-width:97%; }
+	.googlemap iframe { display:block; max-width:100%; }
 }

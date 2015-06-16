@@ -17,11 +17,10 @@ class SampleForm extends TailoredForm {
 	public		$log_type		= 'sample_form_log';
 	public		$submit_key		= 'submit_sample_form';
 	public		$submit_label	= 'Submit Form';
-	public		$form_class		= 'test class';
+	public		$form_class		= 'test class validate';
 	// Which anti-spam modules are available?
 	public		$avail_recaptcha= true;
 	public		$avail_akismet	= false;
-	public		$avail_ayah		= true;
 	public		$check_bad_words= false;
 	
 	/**
@@ -30,10 +29,10 @@ class SampleForm extends TailoredForm {
 	function __construct() {
 		$this->load_questions();
 		$this->init();
-		add_action('ttools_form_before_submit_button', array(&$this,'do_before_submit_button'));
+		add_action('ttools_form_before_submit_button', array($this,'do_before_submit_button'));
 		
 		// If using Akismet, map fields to values
-		add_filter('ttools_map_akismet_fields', array(&$this,'map_form_fields'), 10, 2);
+		add_filter('ttools_map_akismet_fields', array($this,'map_form_fields'), 10, 2);
 	}
 	
 	/**
@@ -69,14 +68,14 @@ class SampleForm extends TailoredForm {
 	 *	Filter to generate email headers
 	 */
 	function filter_headers($headers=false, $form=false) {
-		// Only if its for THIS form.
+		// Only run if its for THIS form.
 		if ($this->form_name !== $form->form_name)	return $headers;
 		// Build headers
 		$from_name = $_POST['cust_name'];
 		$from_email = $_POST['cust_email'];
 		$headers = array(
-			"From: {$from_name} <{$from_email}>",
-			"Reply-To: {$from_name} <{$from_email}>",
+			"From: ".$this->opts['email']['from'],			// From should be an email address at this domain.
+			"Reply-To: {$from_name} <{$from_email}>",		// Reply-to and -path should be visitor email.
 			"Return-Path: {$from_name} <{$from_email}>",
 		);
 		return $headers;
@@ -121,7 +120,7 @@ class SampleForm extends TailoredForm {
 			),
 			'cust_phone'	=> array(
 				'label'		=> 'Phone Number',
-				'type'		=> 'text',
+				'type'		=> 'tel',
 				'required'	=> true,
 				'error'		=> 'Please provide your phone number',
 			),
@@ -134,11 +133,40 @@ class SampleForm extends TailoredForm {
 			'test_select'	=> array(
 				'label'		=> 'Choose Sel',
 				'type'		=> 'select',
-				'options'	=> array( 'one'=>'Option One', 'two'=>'Option Two', 'three'=>'Option Three' ),
+				'options'	=> array( 'one'=>'Option One', 'two'=>'Option Two', 'three'=>'Option Three','four'=>'Option Four' ),
 				'required'	=> true,
 				'error'		=> 'Please use the select box',
 //				'default'	=> 'two',
 			),
+			'cust_date'	=> array(
+				'label'		=> 'Date',
+				'type'		=> 'date',
+			),
+			'cust_time'	=> array(
+				'label'		=> 'Time',
+				'type'		=> 'time',
+			),
+			'cust_date_time'	=> array(
+				'label'		=> 'Date/time',
+				'type'		=> 'datetime',
+			),
+			
+			'cust_country'	=> array(
+				'label'		=> 'Country',
+				'type'		=> 'country',
+			),
+			'cust_number'	=> array(
+				'label'		=> 'Number',
+				'type'		=> 'number',
+			),
+			'cust_range'	=> array(
+				'label'		=> 'Range',
+				'type'		=> 'range',
+				'min'		=> 0,
+				'max'		=> 100,
+			),
+			
+			
 			'test_checks' => array(
 				'type'		=>'fieldset',
 				'label' 	=> 'Some radios & checkboxes...',
@@ -146,7 +174,7 @@ class SampleForm extends TailoredForm {
 					'test_radios'	=> array(
 						'label'		=> 'Choose Rad',
 						'type'		=> 'radio',
-						'options'	=> array( 'one'=>'Option One', 'two'=>'Option Two', 'three'=>'Option Three' ),
+						'options'	=> array( 'one'=>'Option One', 'two'=>'Option Two', 'three'=>'Option Three', 'four'=>'Option Four' ),
 						'required'	=> true,
 						'error'		=> 'Please use the radio boxes',
 		//				'default'	=> 'two',
@@ -172,48 +200,15 @@ class SampleForm extends TailoredForm {
 	
 	
 	/**
-	 *	Admin: This is the part that lists logged submissions
-	 *	Note: This is the old way.  New way uses WP_List_Table class.  See contact form for demo.
+	 *	Main form class includes a function that starts a wp_list_table
+	 *	You can use an empty function if you don't want to display logs.
 	 */
 	function admin_list_logs() {
-		$posts = get_posts(array(
-			'numberposts'	=> -1,
-			'post_type'		=> $this->log_type,
-			'post_status'	=> 'private',
-		));
-		?>
-		<form class="plugin_settings" method="post" action="<?php echo esc_url($_SERVER['REQUEST_URI']); ?>">
-		<?php echo wp_nonce_field($this->nonce); ?>
-		<table class="widefat">
-		  <thead><tr><th><input type="checkbox" id="check_all" /></th><th>Date</th><th>Name</th><th>Email</th><th>Phone</th></tr></thead>
-		  <tbody>
-		  <?php
-		  foreach ($posts as $post) {
-		  	$form = $this->__unserialize($post->post_content);
-			$date = $this->format_time_ago( strtotime($post->post_date) );
-			?>
-			<tr>
-				<td class="ctrl" rowspan="2"><input type="checkbox" name="enquiries[]" value="<?php echo $post->ID; ?>" /></td>
-				<td class="date" rowspan="2"><?php echo $date; ?></td>
-				<td class="name"><?php echo $form['cust_name']; ?></td>
-				<td class="email"><?php echo $form['cust_email']; ?></td>
-				<td class="phone"><?php echo $form['cust_phone']; ?></td>
-			</tr>
-			<tr class="message"><td class="msg" colspan="3">
-            	Viewing: <a href="<?php echo $form['Viewing']; ?>"><?php echo $form['Viewing']; ?></a>
-                <p><?php echo nl2br($form['cust_message']); ?></p>
-            </td></tr>
-			<?php
-		  }
-		  ?>
-		  </tbody>
-		  <tfoot><tr><th colspan="5">
-		  	<input class="button-primary" type="submit" value="Delete Selected" name="DeleteLogs" onclick='return confirm("Are you sure?\nThis action cannot be undone.")'>
-		  </th></tr></tfoot>
-		</table>
-		</form>
-		<?php
+		if (!$this->log_type)	return false;
+		return false;
 	}
+	
+	
 	
 	
 }

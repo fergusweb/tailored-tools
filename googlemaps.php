@@ -24,8 +24,8 @@ class TailoredTools_GoogleMaps {
 		$atts = shortcode_atts(array(
 			'address'	=> false,
 			'class'		=> 'googlemap',
-			'width'		=> 500,
-			'height'	=> 350,
+			'width'		=> 1000,
+			'height'	=> 400,
 			'zoom'		=> 16,
 		), $atts);
 		if (!$atts['address'])	return '';
