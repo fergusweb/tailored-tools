@@ -40,7 +40,7 @@ class ContactForm extends TailoredForm {
 	 */
 	function add_mce_button($buttons) {
 		array_push($buttons, array(
-			'label'		=> 'Contact Form',
+			'label'		=> $this->form_name,
 			'shortcode'	=> '['.$this->shortcode.']',
 		));
 		return $buttons;
@@ -56,19 +56,14 @@ class ContactForm extends TailoredForm {
 				'from'		=> get_bloginfo('admin_email'),
 				'to'		=> get_bloginfo('admin_email'),
 				'bcc'		=> '',
-				'subject'	=> 'Contact Form for '.site_url(),
+				'subject'	=> $this->form_name.' for '.site_url(),
 			),
 			'success' => array(
-				'message'	=> 'Thank you, your message has been sent.',
+				'message'	=> 'Thank you, your enquiry has been sent.',
 				'redirect'	=> '',
 			),
 			'failure'	=> array(
-				'message'	=> 'Sorry, your message could not be sent at this time.',
-			),
-			'recaptcha'	=> array(
-				'use'		=> false,
-				'public'	=> '',
-				'private'	=> '',
+				'message'	=> 'Sorry, your enquiry could not be sent at this time.',
 			),
 		);
 	}
@@ -79,13 +74,12 @@ class ContactForm extends TailoredForm {
 	 */
 	function filter_headers($headers=false, $form=false) {
 		if ($this->form_name !== $form->form_name)	return $headers;
-		$from_name = $_POST['cust_name'];
-		$from_email = $_POST['cust_email'];
+		$visitor_name = $_POST['cust_name'];
+		$visitor_email = $_POST['cust_email'];
 		$headers = array(
-//			"From: ".$this->opts['email']['from'].'>',								// From should be an email address at this domain.
 			"From: ".get_bloginfo('name').' <'.$this->opts['email']['from'].'>',	// From should be an email address at this domain.
-			"Reply-To: {$from_name} <{$from_email}>",								// Reply-to and -path should be visitor email.
-			"Return-Path: {$from_name} <{$from_email}>",
+			"Reply-To: {$visitor_name} <{$visitor_email}>",							// Reply-to and return-path should be visitor email.
+			"Return-Path: {$visitor_name} <{$visitor_email}>",
 		);
 		return $headers;
 	}
@@ -122,6 +116,72 @@ class ContactForm extends TailoredForm {
 	}
 	
 	
+	/**
+	 *	To display logged data for this form
+	 */
+	function admin_list_logs() {
+		$class_name = 'contact_form_log_Table';
+		if (!$this->log_type || !class_exists($class_name))	return false;
+		$per_page = (isset($_GET['per_page']) && is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
+		$table = new $class_name();
+		$table->prepare_items($this->log_type, $per_page);
+		?>
+        <form id="enquiries" method="post">
+            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+            <?php $table->display() ?>
+        </form>
+		<?php
+	}
+	
+	/* */
+}
+
+
+
+/**
+ *	Helper to display logged enquiries
+ */
+if (is_admin() && class_exists('tws_form_log_Table') && !class_exists('contact_form_log_Table')) {
+	class contact_form_log_Table extends tws_form_log_Table {
+	
+		function get_columns() {
+			return array(
+				'cb'			=> '<input type="checkbox" />',
+				'date'			=> __('Date'), //array( 'date', true ),
+				'cust_name'		=> __('Name'),
+				'cust_email'	=> __('Email'),
+				'cust_phone'	=> __('Phone'),
+			);
+		}
+		
+		function display_rows() {
+			if (empty($this->items))	return false;
+			$records = $this->items;
+			list($columns, $hidden) = $this->get_column_info();
+			foreach ($records as $record) {
+				$form = TailoredForm::__unserialize($record->post_content);
+				echo '<tr>'."\n";
+				foreach ($columns as $column_name => $column_label) {
+					switch ($column_name) {
+						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.$record->ID.'" /></th>';	break;
+						case 'date':		echo '<td rowspan="2">'.TailoredForm::format_time_ago( strtotime($record->post_date) ).'</td>';						break;
+						case 'cust_name':	echo '<td>'.$form['cust_name'].'</td>';			break;
+						case 'cust_email':	echo '<td>'.$form['cust_email'].'</td>';		break;
+						case 'cust_phone':	echo '<td>'.$form['cust_phone'].'</td>';		break;
+					}
+				}
+				echo '</tr>'."\n";
+				echo '<tr class="more">';
+				echo '<td colspan="3">';
+				if ($form['cust_message'])	echo 	'<p>'.nl2br($form['cust_message']).'</p>';
+				if ($form['Viewing'])		echo 	'<p>Viewing: <a target="_blank" href="'.$form['Viewing'].'">'.$form['Viewing'].'</a></p>';
+				if (!$form)					echo	"\n<pre>Problem decoding information.\nRaw data: ".print_r($record->post_content,true)."</pre>\n";
+				echo '</td>';
+				echo '</tr>';
+			}
+		}
+		
+	}	
 }
 
 

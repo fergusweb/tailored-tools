@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		4.2.2
-Stable tag:			1.8.1
+Tested up to:		4.4
+Stable tag:			1.8.4
 
 Contains some helper classes to help you build custom forms.
 
@@ -54,11 +54,37 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 1.8.4 =
+This update includes a number of fixes and enhancements.  Check your form settings, and check over your site to ensure everything still works as expected.
+
 = 1.8.0 =
-This is a major upgrade, featuring improved anti-spam options and style changes.  You should check your theme after this upgrade.  Some clients will need manual tweaking.
+This is a major upgrade, featuring improved anti-spam options and style changes.  You should check the appearance of your forms after this upgrade.  Some themes will require manual tweaking.
 
 
 == Changelog ==
+= 1.8.4 =
+* Tweak to select/radio/checkbox outputs, while determine if options are assoc array
+* New editor button for content-columns, appears if using Genesis theme (or child)  (one-third, one-half, etc)
+* Tweaked code for the Extras MCE button (for shortcodes)
+* Change how javascript is enqueued for lighter pageloads.
+* Switch from CDN of a few scripts to including them.
+* Update a few javascript plugins to latest versions
+* Add input type for name (which has two inputs for first and last name)
+* Add input types for address and address_long (which use Google Autocomplete)
+* Add registered script: jquery-geocomplete 
+* Update how logged-data is cleaned for double-quotes. Now stripping slashes and using htmlspecialchars.
+* Tested up to WordPress 4.4 beta.  Looks good.
+
+
+
+= 1.8.2 =
+* Bugfix on form logging (to avoid an error message in certain scenarios when dealing with arrays)
+* Tidy up the code to display logged data
+* Change array(&$this,'function_name') callbacks to remove &
+* Tweaks to default Contact Form options
+* CSS tweaks to allow for .block and .wide elements again (left out of 1.8.0 rebuild)
+* Fix up some issues with default selections for radio and checkbox inputs
+
 = 1.8.1 =
 * Released just to bump the version number.
 

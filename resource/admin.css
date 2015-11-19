@@ -34,4 +34,5 @@ table.widefat tr.more td { border-top:0; }
 table.widefat p { margin:0 0 1em 0; }
 table.widefat p:last-child { margin-bottom:0; }
 
-.mce-toolbar .mce-i-tailored_tools:before { content:url(mce-icon.gif); }
+.mce-toolbar .mce-i-ttools_extras:before { content:url(mce-extras.png); }
+.mce-toolbar .mce-i-ttools_columns:before { content:url(mce-columns.png); }

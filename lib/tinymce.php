@@ -12,7 +12,7 @@ class TailoredTinyMCE {
 		$this->plugin_dir		= trailingslashit(dirname(__FILE__));
 		// Admin only:
 		if (!is_admin())		return;
-		add_action('init', array(&$this,'tiny_mce_init'));
+		add_action('init', array($this,'tiny_mce_init'));
 	}
 
 		
@@ -22,9 +22,9 @@ class TailoredTinyMCE {
 	function tiny_mce_init() {
 		if ( !current_user_can('edit_posts') && !current_user_can('edit_pages') ) { return; }
 		// Rich editor
-		add_filter('mce_buttons',			array(&$this,'filter_mce_buttons'));
-		add_filter('mce_external_plugins',	array(&$this,'filter_mce_external_plugins'));
-		add_filter('mce_css',				array(&$this,'filter_mce_css'));
+		add_filter('mce_buttons',			array($this,'filter_mce_buttons'));
+		add_filter('mce_external_plugins',	array($this,'filter_mce_external_plugins'));
+		add_filter('mce_css',				array($this,'filter_mce_css'));
 	}
 	
 
@@ -32,11 +32,11 @@ class TailoredTinyMCE {
 	 *	Tiny MCE Filters
 	 */
 	function filter_mce_buttons($buttons) {
-		array_push($buttons, '|', 'tailored_tools');
+		array_push($buttons, '|', 'ttools_extras');
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		$plugins['tailored_tools'] = $this->plugin_url.'js/tinymce.js.php';
+		$plugins['ttools_extras'] = $this->plugin_url.'js/tinymce.js.php';
 		return $plugins;
 	}
 	function filter_mce_css($css, $sep=' ,') {

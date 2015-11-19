@@ -15,8 +15,8 @@ class TailoredTools_GoogleMaps {
 	
 	
 	function __construct() {
-		add_shortcode($this->shortcode, array(&$this,'handle_shortcode'));
-		add_shortcode(strtolower($this->shortcode), array(&$this,'handle_shortcode'));
+		add_shortcode($this->shortcode, array($this,'handle_shortcode'));
+		add_shortcode(strtolower($this->shortcode), array($this,'handle_shortcode'));
 	}
 	
 	

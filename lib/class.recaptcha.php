@@ -13,8 +13,8 @@ class Tailored_reCAPTCHA {
 	 *	Constructor
 	 */
 	function __construct() {
-		add_action('ttools_form_before_submit_button', array(&$this,'insert_html_code'), 10, 1);
-		add_filter('ttools_form_filter_validate', array(&$this,'filter_form_validate_error'), 10, 2);
+		add_action('ttools_form_before_submit_button', array($this,'insert_html_code'), 10, 1);
+		add_filter('ttools_form_filter_validate', array($this,'filter_form_validate_error'), 10, 2);
 	}
 	
 	/**

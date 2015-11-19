@@ -100,6 +100,21 @@ jQuery(function($) {
 });
 
 
+/**
+ *	Autoload the geocomplete address fields
+ */
+jQuery(document).ready(function($){
+	// Only run if input present, and plugin present
+	if ($('.geocomplete').length < 1)		return; 
+	if (!$().geocomplete)						return;
+	// Run in loop to set different .details
+	$('input.geocomplete, p.geocomplete input').each(function(i) {
+		$(this).geocomplete({
+			details: $(this).closest('div.address'),
+			detailsAttribute: "data-geo"
+		});
+	});
+});
 
 
 /**

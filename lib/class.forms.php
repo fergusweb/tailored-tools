@@ -15,6 +15,7 @@ abstract class TailoredForm {
 	// Which anti-spam modules are available?
 	public		$avail_recaptcha= true;
 	public		$avail_akismet	= false;
+	public		$avail_ayah		= false;
 	public		$check_bad_words= true;				// Turn this on child-classes to enable check.
 	// Customise these in child-class
 	public		$nonce			= 'tailored-tools';
@@ -46,6 +47,10 @@ abstract class TailoredForm {
 		if (!$this->avail_akismet)		$this->opts['akismet']['use'] = false;
 		if (!$this->avail_ayah)			$this->opts['ayah']['use'] = false;
 		
+		if (empty($this->opts['email']['from']))	$this->opts['email']['from']	= $this->opts['email']['to'];
+		if (empty($this->opts['email']['from']))	$this->opts['email']['from']	= get_bloginfo('admin_email');
+		if (empty($this->opts['email']['to']))		$this->opts['email']['to']		= get_bloginfo('admin_email');
+		
 		// Load akismet API key if one not already specified
 		if (empty($this->opts['akismet']['api_key']))	$this->opts['akismet']['api_key'] = get_option('wordpress_api_key');
 		
@@ -70,11 +75,6 @@ abstract class TailoredForm {
 			'failure'	=> array(
 				'message'	=> 'Sorry, your message could not be sent at this time.',
 			),
-			'recaptcha'	=> array(
-				'use'		=> false,
-				'public'	=> '',
-				'private'	=> '',
-			),
 		);
 	}
 
@@ -90,21 +90,21 @@ abstract class TailoredForm {
 		$this->load_options();
 		if (!$this->form_action)	$this->form_action = esc_url($_SERVER['REQUEST_URI']);
 		if (is_admin()) {
-			add_action('admin_menu', array(&$this,'admin_menu'), 11);
-			add_action('load-dashboard_page_'.$this->option_key, array(&$this,'output_csv_logs'));
+			add_action('admin_menu', array($this,'admin_menu'), 11);
+			add_action('load-dashboard_page_'.$this->option_key, array($this,'output_csv_logs'));
 			return;
 		}
 		// Actions
-		add_action('wp_enqueue_scripts', array(&$this,'enqueue_scripts'));
-		add_action('template_redirect', array(&$this,'process_form'));
-		add_shortcode($this->shortcode, array(&$this,'handle_shortcode'));
-		add_filter('ttools_form_filter_email_headers', array(&$this,'filter_headers'), 10, 2);
+		add_action('wp_enqueue_scripts', array($this,'enqueue_scripts'));
+		add_action('template_redirect', array($this,'process_form'));
+		add_shortcode($this->shortcode, array($this,'handle_shortcode'));
+		add_filter('ttools_form_filter_email_headers', array($this,'filter_headers'), 10, 2);
 		// In case we need to tie-in with a particular form
-		add_action('wp_print_footer_scripts ', array(&$this,'print_footer_scripts'));
+		add_action('wp_print_footer_scripts ', array($this,'print_footer_scripts'));
 		// TinyMCE Button
-		add_filter('tailored_tools_mce_buttons', array(&$this,'add_mce_button'));
+		add_filter('tailored_tools_mce_buttons', array($this,'add_mce_button'));
 		// Build bad-words array
-		add_filter('ttools_form_bad_words_to_check', array(&$this,'filter_bad_words_to_check'), 10, 2);
+		add_filter('ttools_form_bad_words_to_check', array($this,'filter_bad_words_to_check'), 10, 2);
 	}
 
 	
@@ -113,8 +113,8 @@ abstract class TailoredForm {
 	 *	Enqueue scripts & styles
 	 */
 	function enqueue_scripts() {
+		wp_enqueue_script('jquery-validate');
 		wp_enqueue_script('ttools-loader');
-		wp_enqueue_style('jquery-select2');
 		wp_enqueue_style('ttools');
 	}
 	
@@ -142,9 +142,12 @@ abstract class TailoredForm {
 		// Preserve new-lines through json_encode
 		if (is_array($data)) {
 			foreach ($data as $key => $line) {
+				if (is_array($line))	continue;
 				if (strpos($data[$key], "\n")!==false)		$data[$key] = str_replace(array("\r\n", "\r", "\n"), "\\n", $data[$key]);
+				$data[$key] = htmlspecialchars($data[$key], ENT_QUOTES);
 			}
 		}
+		if ($this->debug) echo '<pre>To log: '.print_r($data,true).'</pre>';
 		// Insert into DB
 		$insertID = wp_insert_post(array(
 			'post_title'	=> '',
@@ -244,6 +247,8 @@ abstract class TailoredForm {
 	function process_form() {
 		// Are we processing?
 		if (empty($_POST) || !isset($_POST[$this->submit_key]))	return;
+		// Strip all slashes, we don't want them.
+		$_POST = stripslashes_deep($_POST);
 		// Validate the form
 		if (!$this->validate_form())	return;
 		// Handle file uploads
@@ -331,14 +336,30 @@ abstract class TailoredForm {
 	}
 	
 	function validate_question($key, $q) {
-		if (!$q['required'])		return;
-		if ($q['type'] != 'file') {
-//			if (!isset($_POST[$key]) || trim($_POST[$key])=='')								$this->error[] = $q['error'];
-			if (!isset($_POST[$key]) || (!is_array($_POST[$key]) && trim($_POST[$key])==''))	$this->error[] = $q['error'];
-			if ($q['type']=='email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
-		} else
-		if ($q['type'] == 'file') {
-			if (!isset($_FILES[$key]) || $_FILES[$key]['error'] != '0')	$this->error[] = $q['error'];
+		if (!$q['required'])	return;
+		
+		switch ($q['type']) {
+			case 'name':
+				if ( (!isset($_POST[$key]['first']) || trim($_POST[$key]['first'])=='') || (!isset($_POST[$key]['first']) || trim($_POST[$key]['first'])=='') ) {
+					$this->error[] = $q['error'];
+				}
+			break;
+			case 'address_long':
+				if (!isset($_POST[$key]['number']) ||
+					!isset($_POST[$key]['street']) ||
+					!isset($_POST[$key]['city']) ||
+					!isset($_POST[$key]['state']) ||
+					!isset($_POST[$key]['postcode']) ) {
+						$this->error[] = $q['error'];
+				}
+			break;
+			case 'file':
+				if (!isset($_FILES[$key]) || $_FILES[$key]['error'] != '0')	$this->error[] = $q['error'];
+			break;
+			default:
+				if (!isset($_POST[$key]) || (!is_array($_POST[$key]) && trim($_POST[$key])==''))	$this->error[] = $q['error'];
+				if ($q['type']=='email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
+			break;
 		}
 		
 	}
@@ -455,7 +476,7 @@ abstract class TailoredForm {
 		// Text Note
 		if ($q['type'] == 'note') { echo '<p class="note '.$q['class'].'">'.nl2br($q['label']).'</p>'."\n"; return; }
 		// Prepare default value
-		if (!isset($_POST[$key]) && isset($q['default']))	$_POST[$key] = $q['default'];
+		if (@empty($_POST[$key]) && isset($q['default']))	$_POST[$key] = $q['default'];
 		// Prepare element class
 		if (!is_array($q['class']))		$q['class'] = array($q['class']);
 		if (in_array($q['type'], array('radio', 'checkbox')))	$q['class'][] = 'radio';
@@ -475,6 +496,9 @@ abstract class TailoredForm {
 			case 'number':			$this->draw_number_range($key, $q);		break;
 			case 'range':			$this->draw_number_range($key, $q);		break;
 			case 'hidden':			$this->draw_hidden_input($key, $q);		break;
+			case 'name':			$this->draw_name_inputs($key, $q);		break;
+			case 'address':			$this->draw_address_input($key, $q);	break;
+			case 'address_long':	$this->draw_address_input($key, $q);	break;
 			default:				$this->draw_input($key, $q);			break;
 		}
 	}
@@ -520,7 +544,8 @@ abstract class TailoredForm {
 	
 	function draw_select($key, $q) {
 		// Is this an associative array?
-		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
+//		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
+		$is_assoc = (bool) count(array_filter(array_keys($q['options']), 'is_string'));
 		// Draw Element
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<select name="'.$key.'" id="'.$key.'" class="txt">'."\n";
@@ -539,12 +564,14 @@ abstract class TailoredForm {
 		$name = ($q['type'] == 'checkbox') ? $key.'[]' : $key;
 		if ($q['label'])	$q['label'] = '<span class="label">'.$q['label'].'</span>';
 		// Is this an associative array?
-		$is_assoc = array_keys($q['options']) !== range(0, count($q['options']) - 1);
+		$is_assoc = (bool) count(array_filter(array_keys($q['options']), 'is_string'));
 		// Draw Element
 		echo '<p'.$q['class'].'>'.$q['label']."\n";
 		foreach ($q['options'] as $val => $opt) {
 			if (!$is_assoc)	$val = $opt;
-			$sel = ($_POST[$key] == $val || @in_array($val, $_POST[$key])) ? ' checked="checked"' : '';
+			if (is_string($val))	$val = trim($val);
+			// Select if default, OR if _POST is set.  (But don't set default if _POST is already set)
+			$sel = ($val == $_POST[$key] || @in_array($val, $_POST[$key])) ? ' checked="checked"' : '';
 			echo "\t".'<label><input type="'.$q['type'].'" name="'.$name.'" value="'.$val.'"'.$sel.' /> '.$opt.'</label>'."\n";
 		}
 		echo '</p>'."\n";
@@ -610,6 +637,69 @@ abstract class TailoredForm {
 		echo "\t".'</select></label></p>'."\n";
 	}
 	
+	function draw_name_inputs($key, $q) {
+		// Input type
+		$q['type'] = 'text';
+		// Element class
+		$class = array('txt');
+		if ($q['required'])			$class[] = 'required';
+		// Element Attributes
+		$attrs = 'type="'.$q['type'].'" class="'.implode(' ',$class).'"';
+		// Draw Element		
+		echo '<p class="name"><label><span>'.$q['label'].'</span>'."\n";
+		echo "\t".'<input name="'.$key.'[first]" '.$attrs.' placeholder="First name..." value="'.esc_attr(@$_POST[$key]['first']).'" />'."\n";
+		echo "\t".'<input name="'.$key.'[last]" '.$attrs.' placeholder="Last name..." value="'.esc_attr(@$_POST[$key]['last']).'" />'."\n";
+		echo '</label></p>'."\n";
+	}
+	
+	
+	
+	function draw_address_input($key, $q) {
+		wp_enqueue_script('jquery-geocomplete');
+		// Div class
+		$div_class = ($q['type'] == 'address_long') ? 'address address-long' : 'address address-short';
+		// Input class
+		$class = array('txt');
+		if ($q['required'])			$class[] = 'required';
+		// Begin output
+		echo '<div class="'.$div_class.'">'."\n";
+		if ($q['type'] == 'address') {
+			// SHORT: Geocoder field
+			if (empty($q['placeholder']))	$q['placeholder'] = 'Type your address...';
+			$attrs = 'type="text" name="'.$key.'" id="'.$key.'" class="'.implode(' ',$class).'" placeholder="'.esc_attr($q['placeholder']).'" data-geo="formatted_address"';
+			echo '<p class="geocomplete"><label><span>'.$q['label'].'</span>'."\n";
+			echo "\t".'<input '.$attrs.' value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		} else {
+			// LONG: Geocoder field
+			if (empty($q['placeholder']))	$q['placeholder'] = 'Type your address...';
+			echo '<p class="geocomplete"><label><span>'.$q['label'].'</span>'."\n";
+			echo "\t".'<input type="text" name="'.$key.'[lookup]" class="txt" placeholder="'.esc_attr($q['placeholder']).'" value="'.esc_attr(@$_POST[$key]['lookup']).'" /></label></p>'."\n";
+			// Specific fields for address elements
+			$disabled = ($q['disabled']) ? 'disabled="true"' : '';
+			$readonly = ($q['readonly']) ? 'readonly="true"' : '';
+			
+			$attrs = 'type="text" '.$disabled.' '.$readonly;
+			
+			echo '<p class="street"><label><span>Street</span>'."\n";
+			echo "\t".'<input name="'.$key.'[number]" class="txt street-number" '.$attrs.' data-geo="street_number" placeholder="#" value="'.esc_attr(@$_POST[$key]['number']).'" />'."\n";
+			echo "\t".'<input name="'.$key.'[street]" class="txt street-name" '.$attrs.' data-geo="route" placeholder="Street name" value="'.esc_attr(@$_POST[$key]['street']).'" />'."\n";
+			echo '</label></p>'."\n";
+			echo '<p class="city"><label><span>City</span>'."\n";
+			echo "\t".'<input name="'.$key.'[city]" class="txt" '.$attrs.' data-geo="locality" placeholder="City" value="'.esc_attr(@$_POST[$key]['city']).'" />'."\n";
+			echo '</label></p>'."\n";
+			echo '<p class="state"><label><span>State</span>'."\n";
+			echo "\t".'<input name="'.$key.'[state]" class="txt" '.$attrs.' data-geo="administrative_area_level_1" placeholder="State" value="'.esc_attr(@$_POST[$key]['state']).'" />'."\n";
+			echo '</label></p>'."\n";
+			echo '<p class="postcode"><label><span>Postcode</span>'."\n";
+			echo "\t".'<input name="'.$key.'[postcode]" class="txt" '.$attrs.' data-geo="postal_code" placeholder="Postcode" value="'.esc_attr(@$_POST[$key]['postcode']).'" />'."\n";
+			echo '</label></p>'."\n";
+			echo '<p class="country"><label><span>Country</span>'."\n";
+			echo "\t".'<input name="'.$key.'[country]" class="txt" '.$attrs.' data-geo="country" placeholder="Country" value="'.esc_attr(@$_POST[$key]['country']).'" />'."\n";
+			echo '</label></p>'."\n";
+		}
+		echo '</div><!-- '.$div_class.' -->'."\n";
+	}
+	
 	
 	
 	
@@ -640,8 +730,8 @@ abstract class TailoredForm {
 			$count = $this->count_logs();
 			if ($count && $count->private>0)	$counter = '<span class="update-plugins"><span class="update-count">'. $count->private .'</span></span>';
 		}
-		$hook = add_submenu_page($this->admin_menu, $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array(&$this,'admin_page'));
-//		add_action("load-$hook", array(&$this,'admin_enqueue'));
+		$hook = add_submenu_page($this->admin_menu, $this->form_name, $this->form_name.$counter, 'edit_posts', $this->option_key,  array($this,'admin_page'));
+//		add_action("load-$hook", array($this,'admin_enqueue'));
 		add_action('admin_enqueue_scripts', array($this,'admin_enqueue'));
 	}
 	
@@ -902,13 +992,10 @@ function drawChart() {
 	
 	
 	/**
-	 *	Extend this if you want to list logged submissions
-	 *	Or you can just create a WP_List_Table object with the right name
-	 *	Name should be:  "{$this->log_type}_Table"
+	 *	To display logged data
 	 */
 	function admin_list_logs() {
-		
-		if (!$this->log_type)	return false;
+		if (!$this->log_type || !class_exists('tws_form_log_Table'))	return false;
 		
 		$per_page = (isset($_GET['per_page']) && is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
 		$table = new tws_form_log_Table();
@@ -1019,27 +1106,22 @@ function drawChart() {
 
 
 
+/**
+ *	Ensure our standard version of wp-list-table is included
+ */
+if (is_admin() || !class_exists('tws_WP_List_Table')) {
+	require( dirname(__FILE__).'/class-wp-list-table.php' );
+}
+
+
 
 /**
- *	This is used in the admin area to display logged enquiries
+ *	This is used in the admin area to display logged enquiries.
+ *	I see no reason not to extend tws_form_log_Table when extending the tws-form class.
  */
-if (is_admin()) {
-	if (!class_exists('tws_WP_List_Table'))			require( dirname(__FILE__).'/class-wp-list-table.php' );
-
+if (is_admin() || !class_exists('tws_WP_List_Table')) {
+	
 	class tws_form_log_Table extends tws_WP_List_Table {
-		
-/*
-		function __construct() { //$post_type='', $per_page=20) {
-//			echo "<p>Post Type: $post_type <br />Per Page: $per_page</p>";
-//			$this->post_type = $post_type;
-//			$this->per_page = $per_page;
-			parent::__construct(array(
-				'singular'	=> 'enquiry',
-				'plural'	=> 'enquiries',
-				'ajax'		=> false,
-			));
-		}
-*/
 	
 		function get_columns() {
 			return array(
@@ -1067,18 +1149,12 @@ if (is_admin()) {
 		} 
 		
 		function prepare_items( $post_type='', $per_page=20 ) {
-//			$this->post_type = $post_type;
-//			$this->per_page = $per_page;
-
-//			$per_page = $this->per_page;
 			$columns = $this->get_columns();
 			$hidden = array();
 			$sortable = $this->get_sortable_columns(); 
 			$this->_column_headers = array($columns, $hidden, $sortable); 
 			
 			$this->process_bulk_action(); 
-			
-//			echo '<p>Getting posts - type = '.$post_type.'<br />Per page: '.$per_page.'</p>';
 			
 			$posts = get_posts(array(
 				'numberposts'	=> -1,
@@ -1087,17 +1163,15 @@ if (is_admin()) {
 			));
 			
 			$current_page = $this->get_pagenum(); 
-			
 			$total_items = count($posts); 
 			
 			$this->items = array_slice($posts,(($current_page-1)*$per_page),$per_page);
 			
-			$this->set_pagination_args( array(
+			$this->set_pagination_args(array(
 				'total_items' => $total_items,                  //WE have to calculate the total number of items
 				'per_page'    => $per_page,                     //WE have to determine how many items to show on a page
 				'total_pages' => ceil($total_items/$per_page)   //WE have to calculate the total number of pages
-			) );
-			
+			));
 		}
 		
 		function display_rows() {
@@ -1125,9 +1199,8 @@ if (is_admin()) {
 				echo '</tr>';
 			}
 		}
-		
 	}
-
+	
 }
 
 

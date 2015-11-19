@@ -7,8 +7,8 @@ require_once('../../../../wp-load.php');
 ?>
 //alert('DEBUG: Tailored Tools MCE JS loaded');
 (function() {
-	tinymce.PluginManager.add('tailored_tools', function(editor, url) {
-		editor.addButton('tailored_tools', {
+	tinymce.PluginManager.add('ttools_extras', function(editor, url) {
+		editor.addButton('ttools_extras', {
 			type:		'menubutton',
 			tooltip:	'Tailored Tools Extras',
 			menu:		[
@@ -23,4 +23,3 @@ require_once('../../../../wp-load.php');
 
 	});
 })();
-

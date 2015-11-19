@@ -11,9 +11,9 @@ new TailoredTools_Shortcodes();
 class TailoredTools_Shortcodes {
 
 	function __construct() {
-		add_shortcode('tabs', array(&$this,'shortcode_ui_tabs'));
-		add_shortcode('pagecontent', array(&$this,'shortcode_pagecontent'));
-		add_filter('tailored_tools_mce_buttons', array(&$this,'add_mce_buttons'));
+		add_shortcode('tabs', array($this,'shortcode_ui_tabs'));
+		add_shortcode('pagecontent', array($this,'shortcode_pagecontent'));
+		add_filter('tailored_tools_mce_buttons', array($this,'add_mce_buttons'));
 	}
 	
 	
