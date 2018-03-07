@@ -33,31 +33,9 @@ class ttools_mce_columns {
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		add_action('admin_print_footer_scripts', array($this,'localize_vars'));
-		$plugins['ttools_columns'] = plugins_url('/js/tinymce-columns.js', __FILE__);
+		$plugins['ttools_columns'] = plugins_url('/js/tinymce-columns.js.php', __FILE__);
 		return $plugins;
 	}
-	
-	/**
-	 *	Localize some variables for use in tinymce.js.php
-	 */
-	function localize_vars() {
-		?>
-<script>
-/* <![CDATA[ */
-var ttools_tinymce_columns = [
-	<?php
-	$buttons = apply_filters('tailored_tools_mce_columns', array());
-	foreach ($buttons as $button) {
-		echo "\n".'{ text:"'.$button['label'].'", onclick: function() {editor.insertContent("'.$button['shortcode'].'");} },';
-	}
-	?>
-];
-/* ]]> */</script>
-		<?php
-	}
-	
-	
 	
 	/**
 	 *	Shortcodes to insert

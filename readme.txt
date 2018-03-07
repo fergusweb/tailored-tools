@@ -63,9 +63,11 @@ This is a major upgrade, featuring improved anti-spam options and style changes.
 
 == Changelog ==
 
-= 1.9.0 = 
-* Changing to git version management
-* Update the TinyMCE JS to use localized vars instead of pretending PHP is JS
+= 1.9.0 =
+* Moved to git version control
+* Update js.php files with finding wp-load for non-standard directories
+* Some general fixups
+* add a filter `tailored_tools_disable_contact_form` (return true to disable the default contact form, such as if you're using Gravity Forms instead)
 
 = 1.8.8 = 
 * Better compatibility with Gravity Forms date fields
