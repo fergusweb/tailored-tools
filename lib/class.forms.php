@@ -95,7 +95,7 @@ abstract class TailoredForm {
 			return;
 		}
 		// Actions
-		add_action('wp_enqueue_scripts', array($this,'enqueue_scripts'));
+		add_action('wp_enqueue_scripts', array($this,'enqueue_scripts'), 9);
 		add_action('template_redirect', array($this,'process_form'));
 		add_shortcode($this->shortcode, array($this,'handle_shortcode'));
 		add_filter('ttools_form_filter_email_headers', array($this,'filter_headers'), 10, 2);
@@ -585,6 +585,7 @@ abstract class TailoredForm {
 	function draw_datepicker($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
 		echo "\t".'<input type="date" name="'.$key.'" id="'.$key.'" class="txt datepicker" value="'.esc_attr($_POST[$key]).'" /></label></p>'."\n";
+		wp_enqueue_script('jquery-ui-datepicker');
 	}
 	
 	function draw_timepicker($key, $q) {
@@ -736,7 +737,7 @@ abstract class TailoredForm {
 	}
 	
 	function admin_enqueue() {
-		wp_enqueue_style('tailored-tools', plugins_url('resource/admin.css', dirname(__FILE__)));
+		wp_enqueue_style('ttools-admin');
 	}
 	
 	function admin_page() {

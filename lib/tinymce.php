@@ -36,7 +36,8 @@ class TailoredTinyMCE {
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		$plugins['ttools_extras'] = $this->plugin_url.'js/tinymce.js.php';
+		add_action('admin_print_footer_scripts', array($this,'localize_vars'));
+		$plugins['ttools_extras'] = $this->plugin_url.'js/tinymce-extras.js';
 		return $plugins;
 	}
 	function filter_mce_css($css, $sep=' ,') {
@@ -44,6 +45,24 @@ class TailoredTinyMCE {
 		return $css;
 	}
 	
+	/**
+	 *	Localize some variables for use in tinymce.js.php
+	 */
+	function localize_vars() {
+		?>
+<script>
+/* <![CDATA[ */
+var ttools_tinymce_shortcuts = [
+	<?php
+	$buttons = apply_filters('tailored_tools_mce_buttons', array());
+	foreach ($buttons as $button) {
+		echo "\n".'{ text:"'.$button['label'].'", onclick: function() {editor.insertContent("'.$button['shortcode'].'");} },';
+	}
+	?>
+];
+/* ]]> */</script>
+		<?php
+	}
 }
 
 ?>

@@ -30,6 +30,10 @@ class ContactForm extends TailoredForm {
 	 *	Constructor
 	 */
 	function __construct() {
+		// Is this form disabled?
+		$disabled = apply_filters('tailored_tools_disable_contact_form', false);
+		if ($disabled)	return false;
+		// Proceed
 		$this->load_questions();
 		$this->init();
 	}

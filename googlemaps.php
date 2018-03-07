@@ -32,9 +32,11 @@ class TailoredTools_GoogleMaps {
 		
 		ob_start();
 		
-		$address_url = 'http://maps.google.com.au/maps?f=q&source=s_q&hl=en&t=m&output=embed&z='.$atts['zoom'].'&q='.urlencode($atts['address']);
-		$image_url = 'http://maps.google.com/maps/api/staticmap?format=jpg&size=500x280&sensor=true&zoom='.$atts['zoom'].'&markers='.urlencode($atts['address']);
-		$link_url = 'http://maps.google.com.au/maps?q='.urlencode($atts['address']);
+		$http = (is_ssl()) ? 'https://' : 'http://';
+		$address_url = $http.'maps.google.com.au/maps?f=q&source=s_q&hl=en&t=m&output=embed&z='.$atts['zoom'].'&q='.urlencode($atts['address']);
+		$image_url = $http.'maps.google.com/maps/api/staticmap?format=jpg&size=500x280&sensor=true&zoom='.$atts['zoom'].'&markers='.urlencode($atts['address']);
+		$link_url = $http.'maps.google.com.au/maps?q='.urlencode($atts['address']);
+		
 		?>
 		
 		<div class="<?php echo $atts['class']; ?>">

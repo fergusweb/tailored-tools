@@ -14,6 +14,12 @@ class TailoredTools_Shortcodes {
 		add_shortcode('tabs', array($this,'shortcode_ui_tabs'));
 		add_shortcode('pagecontent', array($this,'shortcode_pagecontent'));
 		add_filter('tailored_tools_mce_buttons', array($this,'add_mce_buttons'));
+		add_action('wp_enqueue_scripts', array($this,'enqueue_scripts'), 9);
+	}
+	
+	function enqueue_scripts() {
+		
+		wp_enqueue_style('ttools');
 	}
 	
 	
@@ -77,6 +83,8 @@ class TailoredTools_Shortcodes {
 		$output = str_replace("</form>\n</p>", '</form>', $output);
 		
 		wp_enqueue_script('jquery-ui-tabs');
+		wp_enqueue_script('ttools-loader');
+		
 		return $output;
 	}
 	

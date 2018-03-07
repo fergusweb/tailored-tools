@@ -37,11 +37,15 @@ jQuery(document).ready(function($){
 jQuery(function($) {
 	if ($('form .datepicker').length < 1)	return;
 	if (!$().datepicker)					return;
-	$('form input.datepicker, form p.datepicker input').attr('type', 'text');
-	$('form input.datepicker, form p.datepicker input').datepicker({
-		dateFormat:		'dd/mm/yy',
-		changeMonth:	true,
-		changeYear:		true
+	
+	$('form input.datepicker, form p.datepicker input').each(function(i) {
+		if ($(this).parents('.gform_fields').length)	return true;
+		$(this).attr('type', 'text');
+		$(this).datepicker({
+			dateFormat:		'dd/mm/yy',
+			changeMonth:	true,
+			changeYear:		true
+		});
 	});
 });
 
@@ -123,7 +127,7 @@ jQuery(document).ready(function($){
  */
 var tab_counter = 0;
 jQuery(document).ready(function($) {
-	if ($('.ui_tabs').size() < 1)		return;
+	if ($('.ui_tabs').length < 1)		return;
 	if (!$().tabs)						return;
 	$('.ui_tabs').each(function(i, tabset) {
 		var ul = $( document.createElement('ul') );

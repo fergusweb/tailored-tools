@@ -2,8 +2,8 @@
 Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
-Tested up to:		4.4
-Stable tag:			1.9.0
+Tested up to:		4.5.3
+Stable tag:			1.8.5
 
 Contains some helper classes to help you build custom forms.
 
@@ -54,7 +54,7 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
-= 1.8.4 =
+= 1.8.6 =
 This update includes a number of fixes and enhancements.  Check your form settings, and check over your site to ensure everything still works as expected.
 
 = 1.8.0 =
@@ -62,6 +62,33 @@ This is a major upgrade, featuring improved anti-spam options and style changes.
 
 
 == Changelog ==
+
+= 1.9.0 = 
+* Changing to git version management
+* Update the TinyMCE JS to use localized vars instead of pretending PHP is JS
+
+= 1.8.8 = 
+* Better compatibility with Gravity Forms date fields
+
+= 1.8.7 = 
+* Fix the GoogleMaps embedder, so that it will work on HTTPS addresses without security warnings.
+
+= 1.8.6 =
+* Change author from Tailored Web Services to Tailored Media
+* Update some JS libraries to latest version
+* Move some of the init from `plugins_loaded` to `after_setup_theme` so theme functions.php can run before forms
+* Add filter to disable the contact form only.  Usage:  `add_filter('tailored_tools_disable_contact_form', '__return_true');`
+* Changed class.forms.php wp_enqueue_scripts priority to 9, so it doesn't over-ride the theme css files
+* Tweaks to other enqueues to keep things working when contact form disabled.
+* Change to CSS Column inserts: now supports two, three, and four columns
+* Codebase needs a 2.0 rewrite.
+
+
+= 1.8.5 =
+* Proper enqueue of code for datepicker fields
+* Embed JS is back, for easy conversion/tracking code.
+* Update some JS libraries to latest version
+
 = 1.8.4 =
 * Tweak to select/radio/checkbox outputs, while determine if options are assoc array
 * New editor button for content-columns, appears if using Genesis theme (or child)  (one-third, one-half, etc)
@@ -74,8 +101,6 @@ This is a major upgrade, featuring improved anti-spam options and style changes.
 * Add registered script: jquery-geocomplete 
 * Update how logged-data is cleaned for double-quotes. Now stripping slashes and using htmlspecialchars.
 * Tested up to WordPress 4.4 beta.  Looks good.
-
-
 
 = 1.8.2 =
 * Bugfix on form logging (to avoid an error message in certain scenarios when dealing with arrays)
