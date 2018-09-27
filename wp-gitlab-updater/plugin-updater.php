@@ -221,8 +221,12 @@ class PluginUpdater extends UpdaterBase {
 				/**
 				 * Check the response.
 				 */
-				$response      = wp_safe_remote_get( $plugin_package );
-				$response_code = wp_remote_retrieve_response_code( $response );
+				// This can be very slow, so just proceed.
+				//$response      = wp_safe_remote_get( $plugin_package );
+				//$response_code = wp_remote_retrieve_response_code( $response );
+				$response = true;
+				$response_code = 200;
+				
 				if ( is_wp_error( $response ) || 200 !== $response_code ) {
 					continue;
 				} else {
