@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	3.0
 Tested up to:		4.5.3
-Stable tag:			1.9.0
+Stable tag:			1.9.1
 
 Contains some helper classes to help you build custom forms.
 
@@ -54,7 +54,7 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
-= 1.8.9 = 
+= 1.9.0 = 
 Add gitlab updater script to update from my private repo.
 
 = 1.8.6 =
@@ -65,6 +65,9 @@ This is a major upgrade, featuring improved anti-spam options and style changes.
 
 
 == Changelog ==
+
+= 1.9.1 = 
+Fix a namespace conflict
 
 = 1.9.0 =
 * Moved to git version control

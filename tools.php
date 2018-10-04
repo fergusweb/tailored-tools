@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Adds some functionality to WordPress that you'll need.
-Version:		1.9.0
+Version:		1.9.1
 Author:			Tailored Media
 Author URI:		http://www.tailoredmedia.com.au
 */
@@ -61,7 +61,7 @@ function tailored_tools_after_setup_theme() {
  *	Gitlab updater
  */
 add_action('admin_init', function() {
-	if (!class_exists('PluginUpdater')) require_once 'wp-gitlab-updater/plugin-updater.php';
+	if (!class_exists('Moenus\GitLabUpdater\PluginUpdater')) require_once 'wp-gitlab-updater/plugin-updater.php';
 
 	new Moenus\GitLabUpdater\PluginUpdater( [
 		'slug'				=> 'tailored-tools', 
