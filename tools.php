@@ -8,7 +8,6 @@ Author URI:		http://www.tailoredmedia.com.au
 */
 
 
-
 //	Register our scripts & styles for later enqueuing
 add_action('init', 'tailored_tools_register_scripts');
 function tailored_tools_register_scripts() {
