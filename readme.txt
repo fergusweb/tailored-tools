@@ -9,7 +9,9 @@ Contains some helper classes to help you build custom forms.
 
 == Description ==
 
-This plugin contains helper classes used to build custom forms.  It's built by [Tailored Web Services](http://www.tailored.com.au "Tailored Web Services") for use on our sites, but anyone is welcome to use it.
+This plugin contains helper classes used to build custom forms.  It's built by [Tailored Media](http://www.tailoredmedia.com.au "Tailored Media") for use on our sites, but anyone is welcome to use it.
+
+NOTE: I would discourage installing this on new sites.  With Gutenberg & form builder plugins, everything can be done better.
 
 This plugin comes with a basic contact form. You can write additional plugins to extend & create more forms. If you are not comfortable writing PHP code, then this plugin is probably not right for you.
 
