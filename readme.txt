@@ -54,6 +54,14 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 1.9.2 =
+* Now using more modern dev tooling
+* Refactor code without changing function
+
+= 1.9.1 = 
+Version bump
+
+
 = 1.9.0 = 
 Add gitlab updater script to update from my private repo.
 
