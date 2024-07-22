@@ -56,21 +56,6 @@ function tailored_tools_after_setup_theme() {
 }
 
 
-/**
- *	Gitlab updater
- */
-add_action('admin_init', function() {
-	if (!class_exists('Moenus\GitLabUpdater\PluginUpdater')) require_once 'wp-gitlab-updater/plugin-updater.php';
-
-	new Moenus\GitLabUpdater\PluginUpdater( [
-		'slug'				=> 'tailored-tools', 
-		'plugin_base_name'	=> 'tailored-tools/tools.php', 
-		'access_token'		=> 'GSCwURSXGgHBLhH8Su8x', 	// hosting@tailored.com.au
-		'gitlab_url'		=> 'https://gitlab.com',
-		'repo'				=> 'tailored-wp-plugins/tailored-tools',
-	] );
-});
-
 
 
 
