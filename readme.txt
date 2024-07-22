@@ -55,8 +55,10 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 == Upgrade Notice ==
 
 = 1.9.2 =
-* Now using more modern dev tooling
-* Refactor code without changing function
+* Now using more modern dev tooling.
+* Refactor code without changing function.
+* Remove some PHP files pretending to be JS files, and implement properly (only applies to classic tinymce editor).
+* Remove the gitlab update script, will use WP repo only now.
 
 = 1.9.1 = 
 Version bump
