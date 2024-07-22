@@ -37,7 +37,7 @@ if (!class_exists('Tailored_Akismet'))			require( dirname(__FILE__).'/includes/c
 
 
 //	Run after all plugins loaded
-add_action('after_setup_theme', 'tailored_tools_plugins_loaded');
+add_action('plugins_loaded', 'tailored_tools_plugins_loaded');
 function tailored_tools_plugins_loaded() {
 	// Include Tailored Tools modules
 	if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/tools/shortcodes.php' );
@@ -48,7 +48,7 @@ function tailored_tools_plugins_loaded() {
 }
 
 // Run after theme loaded
-add_action('after_setup_theme', 'tailored_tools_after_setup_theme');
+add_action('plugins_loaded', 'tailored_tools_after_setup_theme');
 function tailored_tools_after_setup_theme() {
 	//	Contact Form
 	if (!class_exists('ContactForm'))				require( dirname(__FILE__).'/tools/form.contact.php' );

@@ -33,11 +33,11 @@ class TailoredTools_Shortcodes {
 		));
 		array_push($buttons, array(
 			'label'		=> 'Include Content',
-			'shortcode'	=> '[pagecontent id=\"99\"]',
+			'shortcode'	=> '[pagecontent id="99"]',
 		));
 		array_push($buttons, array(
 			'label'		=> 'Google Map',
-			'shortcode'	=> '[googlemap address=\"1 Cavill Ave, Surfers Paradise, QLD\" width=\"1000\" height=\"400\" zoom=\"16\"]',
+			'shortcode'	=> '[googlemap address="1 Cavill Ave, Surfers Paradise, QLD" width="1000" height="400" zoom="16"]',
 		));
 		
 		return $buttons;

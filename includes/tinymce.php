@@ -36,7 +36,15 @@ class TailoredTinyMCE {
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		$plugins['ttools_extras'] = $this->plugin_url.'js/tinymce.js.php';
+		// Using localize to get some data into the DOM that we can use in our JS
+		$data = array();
+		$buttons = apply_filters('tailored_tools_mce_buttons', array());
+		foreach ($buttons as $button) {
+			$data[ $button['label'] ] = $button['shortcode'];
+		}
+		wp_localize_script( 'wp-tinymce', 'ttools_extras', $data );
+		// And add our plugin
+		$plugins['ttools_extras'] = $this->plugin_url.'js/tinymce.js';
 		return $plugins;
 	}
 	function filter_mce_css($css, $sep=' ,') {

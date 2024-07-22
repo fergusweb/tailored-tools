@@ -36,6 +36,8 @@ class ContactForm extends TailoredForm {
 		// Proceed
 		$this->load_questions();
 		$this->init();
+		// Didn't seem to be loading from init()
+		add_filter('tailored_tools_mce_buttons', array($this,'add_mce_button'));
 	}
 	
 	

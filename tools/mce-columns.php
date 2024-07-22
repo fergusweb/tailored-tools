@@ -11,6 +11,10 @@ class ttools_mce_columns {
 		// Only offer this if using a Genesis theme
 		$theme = wp_get_theme();
 		if (!in_array('genesis', array( strtolower($theme->get('Name')), strtolower($theme->get('Template')) )))	return false;
+
+		// Set these
+		$this->plugin_url		= plugin_dir_url(dirname(__FILE__));
+		$this->plugin_dir		= trailingslashit(dirname(__FILE__));
 		
 		// Tiny MCE Filters
 		add_filter('mce_buttons',			array($this,'filter_mce_buttons'));
@@ -33,7 +37,15 @@ class ttools_mce_columns {
 		return $buttons;
 	}
 	function filter_mce_external_plugins($plugins) {
-		$plugins['ttools_columns'] = plugins_url('/js/tinymce-columns.js.php', __FILE__);
+		// Using localize to get some data into the DOM that we can use in our JS
+		$data = array();
+		$buttons = apply_filters('tailored_tools_mce_columns', array());
+		foreach ($buttons as $button) {
+			$data[ $button['label'] ] = $button['shortcode'];
+		}
+		wp_localize_script( 'wp-tinymce', 'ttools_columns', $data );
+		// And add our plugin
+		$plugins['ttools_columns'] = plugins_url('../js/tinymce-columns.js', __FILE__);
 		return $plugins;
 	}
 	
