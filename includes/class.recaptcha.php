@@ -22,7 +22,7 @@ class Tailored_reCAPTCHA {
 	 *	Includes library if not yet present
 	 */
 	function check_in_use($opts) {
-		if (!$opts['recaptcha']['use'])														return false;
+		if (!@$opts['recaptcha']['use'])														return false;
 		if (empty($opts['recaptcha']['public']) || empty($opts['recaptcha']['private']))	return false;
 //		if (!function_exists('recaptcha_get_html'))		require( dirname(__FILE__).'/recaptchalib.php' );
 		return true;

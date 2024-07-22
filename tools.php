@@ -26,13 +26,13 @@ function tailored_tools_register_scripts() {
 
 
 //	Include Helper Classes
-if (!class_exists('TailoredTinyMCE'))			require( dirname(__FILE__).'/lib/tinymce.php' );
-if (!class_exists('TailoredForm'))				require( dirname(__FILE__).'/lib/class.forms.php' );
-if (!class_exists('tws_WP_List_Table'))			require( dirname(__FILE__).'/lib/class-wp-list-table.php' );
+if (!class_exists('TailoredTinyMCE'))			require( dirname(__FILE__).'/includes/tinymce.php' );
+if (!class_exists('TailoredForm'))				require( dirname(__FILE__).'/includes/class.forms.php' );
+if (!class_exists('tws_WP_List_Table'))			require( dirname(__FILE__).'/includes/class-wp-list-table.php' );
 
 // Anti-spam Modules
-if (!class_exists('Tailored_reCAPTCHA'))		require( dirname(__FILE__).'/lib/class.recaptcha.php' );
-if (!class_exists('Tailored_Akismet'))			require( dirname(__FILE__).'/lib/class.akismet.php' );
+if (!class_exists('Tailored_reCAPTCHA'))		require( dirname(__FILE__).'/includes/class.recaptcha.php' );
+if (!class_exists('Tailored_Akismet'))			require( dirname(__FILE__).'/includes/class.akismet.php' );
 
 
 
@@ -40,19 +40,19 @@ if (!class_exists('Tailored_Akismet'))			require( dirname(__FILE__).'/lib/class.
 add_action('after_setup_theme', 'tailored_tools_plugins_loaded');
 function tailored_tools_plugins_loaded() {
 	// Include Tailored Tools modules
-	if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/shortcodes.php' );
-	if (!class_exists('ttools_mce_columns'))		require( dirname(__FILE__).'/mce-columns.php' );
-	if (!class_exists('TailoredTools_GoogleMaps'))	require( dirname(__FILE__).'/googlemaps.php' );
+	if (!class_exists('TailoredTools_Shortcodes'))	require( dirname(__FILE__).'/tools/shortcodes.php' );
+	if (!class_exists('ttools_mce_columns'))		require( dirname(__FILE__).'/tools/mce-columns.php' );
+	if (!class_exists('TailoredTools_GoogleMaps'))	require( dirname(__FILE__).'/tools/googlemaps.php' );
 	//	Helper to embed JS like Adwords Conversion Code
-	if (!class_exists('ttools_embed_page_js'))		require( dirname(__FILE__).'/embed-js.php' );
+	if (!class_exists('ttools_embed_page_js'))		require( dirname(__FILE__).'/tools/embed-js.php' );
 }
 
 // Run after theme loaded
 add_action('after_setup_theme', 'tailored_tools_after_setup_theme');
 function tailored_tools_after_setup_theme() {
 	//	Contact Form
-	if (!class_exists('ContactForm'))				require( dirname(__FILE__).'/form.contact.php' );
-//	if (!class_exists('DummyForm'))					require( dirname(__FILE__).'/form.dummy.php' );
+	if (!class_exists('ContactForm'))				require( dirname(__FILE__).'/tools/form.contact.php' );
+//	if (!class_exists('DummyForm'))					require( dirname(__FILE__).'/tools/form.dummy.php' );
 }
 
 

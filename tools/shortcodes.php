@@ -50,7 +50,7 @@ class TailoredTools_Shortcodes {
 	 *	Revised this to use SmartDOMDocument instead of str_replace, to allow for <h2 id="something">
 	 */
 	function shortcode_ui_tabs($atts=false, $content=null) {
-		if (!class_exists('SmartDOMDocument'))	require_once('lib/class.smartdomdocument.php');
+		if (!class_exists('SmartDOMDocument'))	require_once(dirname(__FILE__).'/../includes/class.smartdomdocument.php');
 		// Strip start and end <p> tags to avoid broken HTML
 		if (substr($content, 0, 4)=='</p>')	$content = substr($content, 4);
 		if (substr($content, -3, 3)=='<p>')	$content = substr($content, 0, -3);
@@ -98,7 +98,7 @@ class TailoredTools_Shortcodes {
 	function shortcode_pagecontent($atts=false) {
 		$atts = shortcode_atts(array(
 			'id'			=> false,
-			'include_title'	=> (strtoupper($atts['include_title'])=='YES') ? true : false,
+			'include_title'	=> (strtoupper(@$atts['include_title'])=='YES') ? true : false,
 		), $atts);
 		if (!is_numeric($atts['id']))	return '';
 		$page = get_page($atts['id']);
