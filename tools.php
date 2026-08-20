@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name:	Tailored Tools
-Description:	Adds some functionality to WordPress that you'll need.
+Description:	Custom contact forms with built-in anti-spam (reCAPTCHA, Akismet), plus shortcodes for Google Maps, tabs, and page includes.
 Version:		1.9.2
 Author:			Tailored Media
 Author URI:		http://www.tailoredmedia.com.au
