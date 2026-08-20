@@ -71,8 +71,9 @@ class SampleForm extends TailoredForm {
 		// Only if its for THIS form.
 		if ($this->form_name !== $form->form_name)	return $headers;
 		// Build headers
-		$from_name = $_POST['cust_name'] ?? '';
-		$from_email = $_POST['cust_email'] ?? '';
+		$from_name = sanitize_text_field($_POST['cust_name'] ?? '');
+		$from_email = sanitize_text_field($_POST['cust_email'] ?? '');
+		if (!is_email($from_email))	$from_email = '';
 		$headers = array(
 			"From: {$from_name} <{$from_email}>",
 			"Reply-To: {$from_name} <{$from_email}>",
@@ -192,15 +193,15 @@ class SampleForm extends TailoredForm {
 			$date = $this->format_time_ago( strtotime($post->post_date) );
 			?>
 			<tr>
-				<td class="ctrl" rowspan="2"><input type="checkbox" name="enquiries[]" value="<?php echo $post->ID; ?>" /></td>
-				<td class="date" rowspan="2"><?php echo $date; ?></td>
-				<td class="name"><?php echo $form['cust_name']; ?></td>
-				<td class="email"><?php echo $form['cust_email']; ?></td>
-				<td class="phone"><?php echo $form['cust_phone']; ?></td>
+				<td class="ctrl" rowspan="2"><input type="checkbox" name="enquiries[]" value="<?php echo esc_attr($post->ID); ?>" /></td>
+				<td class="date" rowspan="2"><?php echo esc_html($date); ?></td>
+				<td class="name"><?php echo esc_html($form['cust_name'] ?? ''); ?></td>
+				<td class="email"><?php echo esc_html($form['cust_email'] ?? ''); ?></td>
+				<td class="phone"><?php echo esc_html($form['cust_phone'] ?? ''); ?></td>
 			</tr>
 			<tr class="message"><td class="msg" colspan="3">
-            	Viewing: <a href="<?php echo $form['Viewing']; ?>"><?php echo $form['Viewing']; ?></a>
-                <p><?php echo nl2br($form['cust_message']); ?></p>
+            	Viewing: <a href="<?php echo esc_url($form['Viewing'] ?? ''); ?>"><?php echo esc_html($form['Viewing'] ?? ''); ?></a>
+                <p><?php echo nl2br(esc_html($form['cust_message'] ?? '')); ?></p>
             </td></tr>
 			<?php
 		  }

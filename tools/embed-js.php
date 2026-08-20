@@ -27,8 +27,8 @@ class ttools_embed_page_js {
 	function save_post( $post_id ) {
 		// Security check
 		if (empty($_POST) || !isset($_POST['embed_javascript']))						return;
-		if ($_POST['post_type'] == 'page' && !current_user_can('edit_page', $post_id))	return;
-		if ($_POST['post_type'] == 'post' && !current_user_can('edit_post', $post_id))	return;
+		// Raw, unescaped JS is echoed verbatim on the front end, so only trust admins with it.
+		if (!current_user_can('manage_options'))	return;
 		if (!isset($_POST['ttools_embedjs']) || ! wp_verify_nonce($_POST['ttools_embedjs'], plugin_basename(__FILE__)))	return;
 		// Save embed code
 		update_post_meta($post_id, $this->meta_value_key, $_POST['embed_javascript']);
@@ -36,6 +36,7 @@ class ttools_embed_page_js {
 	
 	function add_meta_boxes() {
 		global $post;
+		if (!current_user_can('manage_options'))	return;
 		$code = get_post_meta($post->ID, $this->meta_value_key, true);
 		
 		$screens = array('page', 'post');

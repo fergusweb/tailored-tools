@@ -144,11 +144,11 @@ abstract class TailoredForm {
 	function log_form($data=false) {
 		if (!$this->log_type || !$data || empty($data))		return false;
 		// Preserve new-lines through json_encode
+		// Note: values are stored raw; escape at output time (admin list tables), not here.
 		if (is_array($data)) {
 			foreach ($data as $key => $line) {
 				if (is_array($line))	continue;
 				if (strpos($data[$key], "\n")!==false)		$data[$key] = str_replace(array("\r\n", "\r", "\n"), "\\n", $data[$key]);
-				$data[$key] = htmlspecialchars($data[$key], ENT_QUOTES);
 			}
 		}
 		if ($this->debug) echo '<pre>To log: '.print_r($data,true).'</pre>';
@@ -1195,18 +1195,18 @@ if (is_admin() || !class_exists('tws_WP_List_Table')) {
 				echo '<tr>'."\n";
 				foreach ($columns as $column_name => $column_label) {
 					switch ($column_name) {
-						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.$record->ID.'" /></th>';	break;
-						case 'date':		echo '<td rowspan="2">'.TailoredForm::format_time_ago( strtotime($record->post_date) ).'</td>';						break;
-						case 'cust_name':	echo '<td>'.$form['cust_name'].'</td>';			break;
-						case 'cust_email':	echo '<td>'.$form['cust_email'].'</td>';		break;
-						case 'cust_phone':	echo '<td>'.$form['cust_phone'].'</td>';		break;
+						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.esc_attr($record->ID).'" /></th>';	break;
+						case 'date':		echo '<td rowspan="2">'.esc_html(TailoredForm::format_time_ago( strtotime($record->post_date) )).'</td>';						break;
+						case 'cust_name':	echo '<td>'.esc_html($form['cust_name'] ?? '').'</td>';			break;
+						case 'cust_email':	echo '<td>'.esc_html($form['cust_email'] ?? '').'</td>';		break;
+						case 'cust_phone':	echo '<td>'.esc_html($form['cust_phone'] ?? '').'</td>';		break;
 					}
 				}
 				echo '</tr>'."\n";
 				echo '<tr class="more">';
 				echo '<td colspan="3">';
-				echo 	'<p>'.nl2br($form['cust_message']).'</p>';
-				echo 	'<p>Viewing: <a target="_blank" href="'.$form['Viewing'].'">'.$form['Viewing'].'</a></p>';
+				echo 	'<p>'.nl2br(esc_html($form['cust_message'] ?? '')).'</p>';
+				echo 	'<p>Viewing: <a target="_blank" href="'.esc_url($form['Viewing'] ?? '').'">'.esc_html($form['Viewing'] ?? '').'</a></p>';
 				echo '</td>';
 				echo '</tr>';
 			}

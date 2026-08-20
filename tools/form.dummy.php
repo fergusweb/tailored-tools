@@ -74,8 +74,9 @@ class DummyForm extends TailoredForm {
 	 */
 	function filter_headers($headers=false, $form=false) {
 		if ($this->form_name !== $form->form_name)	return $headers;
-		$visitor_name = $_POST['cust_name'] ?? '';
-		$visitor_email = $_POST['cust_email'] ?? '';
+		$visitor_name = sanitize_text_field($_POST['cust_name'] ?? '');
+		$visitor_email = sanitize_text_field($_POST['cust_email'] ?? '');
+		if (!is_email($visitor_email))	$visitor_email = '';
 		$headers = array(
 			"From: ".get_bloginfo('name').' <'.$this->opts['email']['from'].'>',	// From should be an email address at this domain.
 			"Reply-To: {$visitor_name} <{$visitor_email}>",							// Reply-to and return-path should be visitor email.
@@ -259,18 +260,18 @@ if (is_admin() && class_exists('tws_form_log_Table') && !class_exists('contact_f
 				echo '<tr>'."\n";
 				foreach ($columns as $column_name => $column_label) {
 					switch ($column_name) {
-						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.$record->ID.'" /></th>';	break;
-						case 'date':		echo '<td rowspan="2">'.TailoredForm::format_time_ago( strtotime($record->post_date) ).'</td>';						break;
-						case 'cust_name':	echo '<td>'.$form['cust_name'].'</td>';			break;
-						case 'cust_email':	echo '<td>'.$form['cust_email'].'</td>';		break;
-						case 'cust_phone':	echo '<td>'.$form['cust_phone'].'</td>';		break;
+						case 'cb':			echo '<th rowspan="2" class="check-column"><input type="checkbox" name="records[]" value="'.esc_attr($record->ID).'" /></th>';	break;
+						case 'date':		echo '<td rowspan="2">'.esc_html(TailoredForm::format_time_ago( strtotime($record->post_date) )).'</td>';						break;
+						case 'cust_name':	echo '<td>'.esc_html($form['cust_name'] ?? '').'</td>';			break;
+						case 'cust_email':	echo '<td>'.esc_html($form['cust_email'] ?? '').'</td>';		break;
+						case 'cust_phone':	echo '<td>'.esc_html($form['cust_phone'] ?? '').'</td>';		break;
 					}
 				}
 				echo '</tr>'."\n";
 				echo '<tr class="more">';
 				echo '<td colspan="3">';
-				echo 	'<p>'.nl2br($form['cust_message']).'</p>';
-				echo 	'<p>Viewing: <a target="_blank" href="'.$form['Viewing'].'">'.$form['Viewing'].'</a></p>';
+				echo 	'<p>'.nl2br(esc_html($form['cust_message'] ?? '')).'</p>';
+				echo 	'<p>Viewing: <a target="_blank" href="'.esc_url($form['Viewing'] ?? '').'">'.esc_html($form['Viewing'] ?? '').'</a></p>';
 				echo '</td>';
 				echo '</tr>';
 			}
