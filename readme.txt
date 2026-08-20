@@ -1,9 +1,9 @@
 === Tailored Tools ===
 Contributors:		tailoredweb, ajferg
 Tags:				
-Requires at least:	3.0
-Tested up to:		4.5.3
-Stable tag:			1.9.1
+Requires at least:	7.0
+Tested up to:		7.1
+Stable tag:			3.0.0
 
 Contains some helper classes to help you build custom forms.
 
@@ -51,35 +51,29 @@ Sometimes you need to include the same bit of content in many places on your sit
 
 = [googlemap address="123 somewhere street, Kansas"] =
 
-To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.  This will embed both the iFrame and a static image.  Use CSS to determine which one is shown.  Use CSS media queries for responsive behavior here.
+To embed a Google Map iframe, use this shortcode.  Google will geocode your address to determine where the pin goes.  You can also specify width, height, and zoom.  You can also provide 'class' to set a CSS class on the iframe element.
 
 
 == Upgrade Notice ==
 
-= 1.9.2 =
-* Now using more modern dev tooling.
-* Refactor code without changing function.
-* Remove some PHP files pretending to be JS files, and implement properly (only applies to classic tinymce editor).
-* Remove the gitlab update script, will use WP repo only now.
-
-= 1.9.1 = 
-Version bump
-
-
-= 1.9.0 = 
-Add gitlab updater script to update from my private repo.
-
-= 1.8.6 =
-This update includes a number of fixes and enhancements.  Check your form settings, and check over your site to ensure everything still works as expected.
-
-= 1.8.0 =
-This is a major upgrade, featuring improved anti-spam options and style changes.  You should check the appearance of your forms after this upgrade.  Some themes will require manual tweaking.
+= 3.0.0 =
+PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admin users only (not editors/contributors).
 
 
 == Changelog ==
 
+= 3.0.0 =
+* Fix PHP8 errors & warnings
+* Big version bump, official plugin hasn't been updated in years, want to jump over any manual fixes for 2.x
+* Add column styles (.one-half, .one-third, etc) to plugin stylesheet
+* Fix some issues with Maps embed, remove the static image that requires API.  The iframe seems to work.
+* Embed JS tool (per-page for adding JS tracking code) now restricted to admin role only
+* Fix email header injection vulnerability in contact form (Reply-To/Return-Path headers)
+* Escape output in admin form-log list tables instead of relying on escaping at save time
+* Fix form validation so the "last name" field is actually required on name-type fields
+
 = 1.9.1 = 
-Fix a namespace conflict
+* Fix a namespace conflict
 
 = 1.9.0 =
 * Moved to git version control
