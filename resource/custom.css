@@ -395,6 +395,7 @@ p.success {
 	border-radius: 0.4em 0.4em 0 0;
 	color: #626060;
 	background: #d7d6d6;
+	text-decoration: none;
 }
 .ui-tabs .ui-tabs-nav li.ui-tabs-active {
 }
@@ -433,5 +434,88 @@ p.success {
 	.ui-tabs .ui-tabs-panel h1,
 	.ui-tabs .ui-tabs-panel h2 {
 		display: none;
+	}
+}
+
+/**
+ *	CSS Columns - seems they were removed in Genesis 2.3.0
+ */
+.five-sixths,
+.four-fifths,
+.four-sixths,
+.one-fifth,
+.one-fourth,
+.one-half,
+.one-sixth,
+.one-third,
+.three-fifths,
+.three-fourths,
+.three-sixths,
+.two-fifths,
+.two-fourths,
+.two-sixths,
+.two-thirds {
+	float: left;
+	margin-left: 4.166666666%;
+	&.first {
+		margin-left: 0;
+	}
+}
+.one-half,
+.three-sixths,
+.two-fourths {
+	width: 47.9166666666%;
+}
+.one-third,
+.two-sixths {
+	width: 30.555555555%;
+}
+.four-sixths,
+.two-thirds {
+	width: 65.277777777%;
+}
+.one-fourth {
+	width: 21.875%;
+}
+.three-fourths {
+	width: 73.958333333%;
+}
+.one-fifth {
+	width: 16.666666666%;
+}
+.two-fifths {
+	width: 37.5%;
+}
+.three-fifths {
+	width: 58.333333333%;
+}
+.four-fifths {
+	width: 79.166666666%;
+}
+.one-sixth {
+	width: 13.194444444%;
+}
+.five-sixths {
+	width: 82.638888888%;
+}
+
+@media only screen and (max-width: 480px) {
+	.five-sixths,
+	.four-fifths,
+	.four-sixths,
+	.one-fifth,
+	.one-fourth,
+	.one-half,
+	.one-sixth,
+	.one-third,
+	.three-fifths,
+	.three-fourths,
+	.three-sixths,
+	.two-fifths,
+	.two-fourths,
+	.two-sixths,
+	.two-thirds {
+		margin: 0;
+		width: 100%;
 	}
 }
