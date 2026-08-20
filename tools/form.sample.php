@@ -71,8 +71,8 @@ class SampleForm extends TailoredForm {
 		// Only if its for THIS form.
 		if ($this->form_name !== $form->form_name)	return $headers;
 		// Build headers
-		$from_name = $_POST['cust_name'];
-		$from_email = $_POST['cust_email'];
+		$from_name = $_POST['cust_name'] ?? '';
+		$from_email = $_POST['cust_email'] ?? '';
 		$headers = array(
 			"From: {$from_name} <{$from_email}>",
 			"Reply-To: {$from_name} <{$from_email}>",
@@ -88,9 +88,9 @@ class SampleForm extends TailoredForm {
 	function map_form_fields($fields=false, $form=false) {
 		if ($this->form_name !== $form->form_name)	return $fields;
 		$fields = array(
-			'name'		=> $_POST['cust_name'],
-			'email'		=> $_POST['cust_email'],
-			'message'	=> $_POST['cust_message'],
+			'name'		=> $_POST['cust_name'] ?? '',
+			'email'		=> $_POST['cust_email'] ?? '',
+			'message'	=> $_POST['cust_message'] ?? '',
 		);
 		return $fields;
 	}
@@ -188,7 +188,7 @@ class SampleForm extends TailoredForm {
 		  <tbody>
 		  <?php
 		  foreach ($posts as $post) {
-		  	$form = $this->__unserialize($post->post_content);
+		  	$form = $this->decode_log_data($post->post_content);
 			$date = $this->format_time_ago( strtotime($post->post_date) );
 			?>
 			<tr>

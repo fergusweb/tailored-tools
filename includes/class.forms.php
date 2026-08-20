@@ -28,7 +28,11 @@ abstract class TailoredForm {
 	public		$show_graph		= false;			// Embed a graph before results to show leads over time
 	public		$submit_key		= 'submit_form';	// submit button key - for processing.
 	public		$submit_label	= 'Submit Form';
-	
+	// Set up at runtime - declared here to avoid PHP 8.2 "dynamic property" deprecations
+	public		$opts			= array();
+	public		$files			= array();
+	public		$was_mail_sent	= false;
+
 	
 	/**
 	 *	Constructor
@@ -138,7 +142,7 @@ abstract class TailoredForm {
 	 *	Log form submission as a custom post-type
 	 */
 	function log_form($data=false) {
-		if (!$this->log_type || !data || empty($data))		return false;
+		if (!$this->log_type || !$data || empty($data))		return false;
 		// Preserve new-lines through json_encode
 		if (is_array($data)) {
 			foreach ($data as $key => $line) {
@@ -188,12 +192,13 @@ abstract class TailoredForm {
 		foreach ($questions as $key => $q) {
 			if ($q['type'] == 'fieldset')	$this->process_upload( $questions[$key]['questions'] );
 			if ($q['type'] != 'file')		continue;
+			if (!isset($_FILES[$key]))		continue;
 			$upload = $dir['basedir'].'/'.$_FILES[$key]['name'];
 			if (!move_uploaded_file($_FILES[$key]['tmp_name'], $upload))	continue;
 			$this->files[] = $upload;
 		}
 	}
-	
+
 	/**
 	 *	Process upload & prepare attachments
 	 *
@@ -745,21 +750,21 @@ abstract class TailoredForm {
 		echo '<h2>'.$this->form_name.'</h2>'."\n";
 		// Save Settings
 		if (isset($_POST['SaveSettings'])) {
-			if (!wp_verify_nonce($_POST['_wpnonce'], $this->nonce)) {	echo '<div class="updated"><p>Invalid security.</p></div>'."\n"; return; }
+			if (!wp_verify_nonce($_POST['_wpnonce'] ?? '', $this->nonce)) {	echo '<div class="updated"><p>Invalid security.</p></div>'."\n"; return; }
 			$_POST = stripslashes_deep($_POST);
 			//echo '<pre>'; print_r($_POST); echo '</pre>';
 			$this->opts['email'] = array_merge((array)$this->opts['email'], array(
-				'from'		=> $_POST['email']['from'],
-				'to'		=> $_POST['email']['to'],
-				'bcc'		=> $_POST['email']['bcc'],
-				'subject'	=> $_POST['email']['subject'],
+				'from'		=> $_POST['email']['from'] ?? '',
+				'to'		=> $_POST['email']['to'] ?? '',
+				'bcc'		=> $_POST['email']['bcc'] ?? '',
+				'subject'	=> $_POST['email']['subject'] ?? '',
 			));
 			$this->opts['success'] = array_merge((array)$this->opts['success'], array(
-				'message'	=> $_POST['success']['msg'],
-				'redirect'	=> $_POST['success']['url'],
+				'message'	=> $_POST['success']['msg'] ?? '',
+				'redirect'	=> $_POST['success']['url'] ?? '',
 			));
 			$this->opts['failure'] = array_merge((array)$this->opts['failure'], array(
-				'message'	=> $_POST['failure']['msg'],
+				'message'	=> $_POST['failure']['msg'] ?? '',
 			));
 			$this->opts['recaptcha'] = array_merge((array)$this->opts['recaptcha'], array(
 				'use'		=> ((isset($_POST['recaptcha']['use']) && $_POST['recaptcha']['use'] == 'yes') ? true : false),
@@ -1003,7 +1008,7 @@ function drawChart() {
 		$table->prepare_items($this->log_type, $per_page);
 		?>
         <form id="enquiries" method="post">
-            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+            <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page'] ?? '') ?>" />
             <?php $table->display() ?>
         </form>
 		<?php
@@ -1061,7 +1066,7 @@ function drawChart() {
 		$data = array();
 		foreach ($posts as $post) {
 		  	$row = array();
-			$form = $this->__unserialize($post->post_content);
+			$form = $this->decode_log_data($post->post_content);
 			$form['date'] = date('d-m-Y h:i:sa', strtotime($post->post_date));
 			
 			foreach ($columns as $key => $label) {
@@ -1089,14 +1094,20 @@ function drawChart() {
 	
 	/**
 	 *	Helper to fix the "Error at offset" issue
+	 *	(the /e modifier used here previously was removed in PHP 7.0, and always failed)
 	 */
-	public static function __unserialize($data) {
+	public static function decode_log_data($data) {
+		if (!is_string($data))	return array();
 		// First attempt json_decode
 		$decoded = json_decode($data);
 		if ($decoded)	return (array) $decoded;
-		// If not, go ahead with unseralize
-		$data = preg_replace('!s:(\d+):"(.*?)";!e', "'s:'.strlen('$2').':\"$2\";'", $data );
-		return unserialize($data);
+		// If not, fix up any string-length prefixes that drifted out of sync (eg. after
+		// a charset conversion), then fall back to unserialize()
+		$data = preg_replace_callback('!s:(\d+):"(.*?)";!s', function($m) {
+			return 's:'.strlen($m[2]).':"'.$m[2].'";';
+		}, $data);
+		$result = @unserialize($data);
+		return (is_array($result)) ? $result : array();
 	}
 	
 	
@@ -1180,7 +1191,7 @@ if (is_admin() || !class_exists('tws_WP_List_Table')) {
 			$records = $this->items;
 			list($columns, $hidden) = $this->get_column_info();
 			foreach ($records as $record) {
-				$form = TailoredForm::__unserialize($record->post_content);
+				$form = TailoredForm::decode_log_data($record->post_content);
 				echo '<tr>'."\n";
 				foreach ($columns as $column_name => $column_label) {
 					switch ($column_name) {

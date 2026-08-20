@@ -22,7 +22,7 @@ class Tailored_reCAPTCHA {
 	 *	Includes library if not yet present
 	 */
 	function check_in_use($opts) {
-		if (!@$opts['recaptcha']['use'])														return false;
+		if (empty($opts['recaptcha']['use']))												return false;
 		if (empty($opts['recaptcha']['public']) || empty($opts['recaptcha']['private']))	return false;
 //		if (!function_exists('recaptcha_get_html'))		require( dirname(__FILE__).'/recaptchalib.php' );
 		return true;
@@ -52,15 +52,15 @@ class Tailored_reCAPTCHA {
 		$response = wp_remote_post('https://www.google.com/recaptcha/api/siteverify', array(
 			'body'	=> array(
 				'secret'	=> $form->opts['recaptcha']['private'],
-				'response'	=> $_POST['g-recaptcha-response'],
-				'remoteip'	=> $_SERVER['REMOTE_ADDR'],
+				'response'	=> $_POST['g-recaptcha-response'] ?? '',
+				'remoteip'	=> $_SERVER['REMOTE_ADDR'] ?? '',
 			),
 		));
 		$response = wp_remote_retrieve_body( $response );
 		$response = json_decode( $response );
 //		echo '<pre>Response - '.print_r($response,true).'</pre>';	//exit;
-		
-		if (!$response->success) {
+
+		if (!$response || empty($response->success)) {
 			$errors[] = 'You did not prove that you are not a robot.  Please click the box, and follow the instructions to prove you are not a robot.';
 		} 
 		return $errors;

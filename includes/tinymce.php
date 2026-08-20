@@ -6,7 +6,9 @@
 $TailoredTinyMCE = new TailoredTinyMCE();
 
 class TailoredTinyMCE {
-	
+	public	$plugin_url	= '';
+	public	$plugin_dir	= '';
+
 	function __construct() {
 		$this->plugin_url		= plugin_dir_url(dirname(__FILE__));
 		$this->plugin_dir		= trailingslashit(dirname(__FILE__));

@@ -80,8 +80,8 @@ class ContactForm extends TailoredForm {
 	 */
 	function filter_headers($headers=false, $form=false) {
 		if ($this->form_name !== $form->form_name)	return $headers;
-		$visitor_name = $_POST['cust_name'];
-		$visitor_email = $_POST['cust_email'];
+		$visitor_name = $_POST['cust_name'] ?? '';
+		$visitor_email = $_POST['cust_email'] ?? '';
 		$headers = array(
 			"From: ".get_bloginfo('name').' <'.$this->opts['email']['from'].'>',	// From should be an email address at this domain.
 			"Reply-To: {$visitor_name} <{$visitor_email}>",							// Reply-to and return-path should be visitor email.
@@ -133,7 +133,7 @@ class ContactForm extends TailoredForm {
 		$table->prepare_items($this->log_type, $per_page);
 		?>
         <form id="enquiries" method="post">
-            <input type="hidden" name="page" value="<?php echo $_REQUEST['page'] ?>" />
+            <input type="hidden" name="page" value="<?php echo esc_attr($_REQUEST['page'] ?? '') ?>" />
             <?php $table->display() ?>
         </form>
 		<?php
@@ -165,7 +165,7 @@ if (is_admin() && class_exists('tws_form_log_Table') && !class_exists('contact_f
 			$records = $this->items;
 			list($columns, $hidden) = $this->get_column_info();
 			foreach ($records as $record) {
-				$form = TailoredForm::__unserialize($record->post_content);
+				$form = TailoredForm::decode_log_data($record->post_content);
 				echo '<tr>'."\n";
 				foreach ($columns as $column_name => $column_label) {
 					switch ($column_name) {

@@ -6,7 +6,9 @@
 new ttools_mce_columns();
 
 class ttools_mce_columns {
-	
+	public	$plugin_url	= '';
+	public	$plugin_dir	= '';
+
 	function __construct() {
 		// Only offer this if using a Genesis theme
 		$theme = wp_get_theme();

@@ -11,6 +11,7 @@ class Tailored_Akismet {
 	private	$api_version	= '1.1';	// Version of Akismet
 	private	$user_agent		= false;
 	public	$api_url		= 'rest.akismet.com';
+	private	$error_message	= false;	// Set when remote_check_key() fails
 
 	/**
 	 *	Constructor
@@ -56,12 +57,12 @@ class Tailored_Akismet {
 	/**
 	 *	I made this a filter to so we can map to different fields if necessary
 	 */
-	function map_form_fields($form=false) {
+	function map_form_fields($fields=array(), $form=false) {
 		if (!is_array($fields))	$fields = array();
 		$fields = array(
-			'name'		=> $_POST['cust_name'],
-			'email'		=> $_POST['cust_email'],
-			'message'	=> $_POST['cust_message'],
+			'name'		=> $_POST['cust_name'] ?? '',
+			'email'		=> $_POST['cust_email'] ?? '',
+			'message'	=> $_POST['cust_message'] ?? '',
 		);
 		return $fields;
 	}
@@ -109,18 +110,18 @@ class Tailored_Akismet {
 	 */
 	function check_form($api_key, $name='', $email='', $message='', $url='') {
 		$akismet_url = 'http://'.$api_key.'.'.$this->api_url.'/'.$this->api_version.'/comment-check';
-		$form = wp_parse_args($form, array(
+		$form = array(
 			'blog'			=> urlencode(site_url()),
-			'user_ip'		=> $_SERVER['REMOTE_ADDR'],
-			'user_agent'	=> $_SERVER['HTTP_USER_AGENT'],
-			'referrer'		=> $_SERVER['HTTP_REFERER'],
+			'user_ip'		=> $_SERVER['REMOTE_ADDR'] ?? '',
+			'user_agent'	=> $_SERVER['HTTP_USER_AGENT'] ?? '',
+			'referrer'		=> $_SERVER['HTTP_REFERER'] ?? '',
 			'comment_type'	=> 'custom_form',
 			// These are the form _POST values
 			'name'		=> $name,
 			'email'		=> $email,
 			'url'		=> $url,
 			'message'	=> $message,
-		));
+		);
 //echo '<p>Checking form with Akismet:</p><pre>'; print_r($form); echo '</pre>';
 		$http_args = array(
 			'httpversion'	=> '1.0',
