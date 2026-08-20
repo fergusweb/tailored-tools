@@ -345,7 +345,7 @@ abstract class TailoredForm {
 		
 		switch ($q['type']) {
 			case 'name':
-				if ( (!isset($_POST[$key]['first']) || trim($_POST[$key]['first'])=='') || (!isset($_POST[$key]['first']) || trim($_POST[$key]['first'])=='') ) {
+				if ( (!isset($_POST[$key]['first']) || trim($_POST[$key]['first'])=='') || (!isset($_POST[$key]['last']) || trim($_POST[$key]['last'])=='') ) {
 					$this->error[] = $q['error'];
 				}
 			break;
@@ -1083,7 +1083,7 @@ function drawChart() {
 	public static function format_time_ago($timestamp) {
 		if (!is_numeric($timestamp)) $timestamp = strtotime($timestamp);
 		$t_diff = time() - $timestamp;
-		if (abs($t_diff < 86400)) {	// 24 hours
+		if (abs($t_diff) < 86400) {	// 24 hours
 			$h_time = sprintf( __( '%s ago' ), human_time_diff( $timestamp, current_time('timestamp') ) );
 		} else {
 			$h_time = date('Y/m/d', $timestamp);
