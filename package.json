@@ -4,6 +4,7 @@
   "repository": "https://github.com/fergusweb/tailored-tools",
   "license": "GPL-3.0",
   "main": "build/index.js",
+  "packageManager": "pnpm@11.21.0",
   "scripts": {
     "start": "wp-env start",
     "debug": "wp-env start --xdebug",

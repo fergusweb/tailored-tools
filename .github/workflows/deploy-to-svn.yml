@@ -16,10 +16,17 @@ jobs:
     steps:
       - uses: actions/checkout@main
 
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+
       - name: Build script
         run: |
-          npm install
-          npm run build
+          pnpm install --frozen-lockfile
+          pnpm run build
       
       - name: WordPress Plugin Deploy
         uses: nk-o/action-wordpress-plugin-deploy@master
