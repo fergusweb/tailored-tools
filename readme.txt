@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	7.0
 Tested up to:		7.1
-Stable tag:			3.0.0
+Stable tag:			3.0.1
 
 Contains some helper classes to help you build custom forms.
 
@@ -37,6 +37,10 @@ No. This plugin is available as-is.
 
 The plugin contains two forms: a contact form, and a sample form.  Have a look at the source code to see how to write your own forms.  If you're not comfortable writing PHP code, this plugin is probably not the best choice for you.
 
+= Where do I report security bugs found in this plugin? =
+
+Please report security bugs found in the source code of the Tailored Tools plugin through the [Patchstack Vulnerability Disclosure  Program](https://patchstack.com/database/vdp/b9da901b-cbf9-49da-bc1e-3fade0f159de). The Patchstack team will assist you with verification, CVE assignment, and notify the developers of this plugin.
+
 == Shortcodes ==
 
 This plugin also includes some shortcodes that we tend to use a lot.
@@ -61,6 +65,9 @@ PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admi
 
 
 == Changelog ==
+
+= 3.0.1 =
+* Add security disclosure policy (Patchstack Vulnerability Disclosure Program) link to FAQ
 
 = 3.0.0 =
 * Fix PHP8 errors & warnings
