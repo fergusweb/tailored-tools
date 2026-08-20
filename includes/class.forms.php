@@ -10,7 +10,8 @@ abstract class TailoredForm {
 	public		$form_action	= false;
 	public		$form_class		= false;
 	public		$form_enctype	= false;			// If uploads, change to: 'multipart/form-data';
-	public	$error, $success	= false;
+	public		$error			= array();
+	public		$success		= array();
 	public		$debug			= false;
 	// Which anti-spam modules are available?
 	public		$avail_recaptcha= true;
@@ -341,7 +342,7 @@ abstract class TailoredForm {
 	}
 	
 	function validate_question($key, $q) {
-		if (!$q['required'])	return;
+		if (empty($q['required']))	return;
 		
 		switch ($q['type']) {
 			case 'name':
