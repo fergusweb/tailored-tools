@@ -32,14 +32,16 @@ class TailoredTools_GoogleMaps {
 		
 		ob_start();
 		
+		//	Shortcode attributes are plain text, so kses never inspects them at save time.
+		//	They have to be escaped/coerced here or they break out of the attributes below.
 		$http = (is_ssl()) ? 'https://' : 'http://';
-		$address_url = $http.'maps.google.com.au/maps?f=q&source=s_q&hl=en&t=m&output=embed&z='.$atts['zoom'].'&q='.urlencode($atts['address']);
+		$address_url = $http.'maps.google.com.au/maps?f=q&source=s_q&hl=en&t=m&output=embed&z='.absint($atts['zoom']).'&q='.urlencode($atts['address']);
 
 		?>
 
-		<div class="<?php echo $atts['class']; ?>">
+		<div class="<?php echo esc_attr($atts['class']); ?>">
 			<div>
-				<iframe class="<?php echo $atts['class']; ?>" width="<?php echo $atts['width']; ?>" height="<?php echo $atts['height']; ?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo $address_url; ?>"></iframe>
+				<iframe class="<?php echo esc_attr($atts['class']); ?>" width="<?php echo absint($atts['width']); ?>" height="<?php echo absint($atts['height']); ?>" frameborder="0" scrolling="no" marginheight="0" marginwidth="0" src="<?php echo esc_url($address_url); ?>"></iframe>
 			</div>
 		</div><!-- Google Map -->
 		
