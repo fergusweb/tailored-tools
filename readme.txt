@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	7.0
 Tested up to:		7.1
-Stable tag:			3.0.1
+Stable tag:			3.0.2
 
 Contains some helper classes to help you build custom forms.
 
@@ -51,7 +51,9 @@ This will apply formatting and javascript to implement [jQuery UI Tabs](http://j
 
 = [pagecontent id="1"] =
 
-Sometimes you need to include the same bit of content in many places on your site.  To save time, this shortcode will let you include the content from one page in many places.  Just use the shortcode, and provide the ID of the page you want to include.  Eg, [pagecontent id="3"] will insert all content from the page with ID = 3.  You can use [pagecontent id="3" include_title="no"] if you want to include the text only, and not the page title.
+Sometimes you need to include the same bit of content in many places on your site.  To save time, this shortcode will let you include the content from one page in many places.  Just use the shortcode, and provide the ID of the page you want to include.  Eg, [pagecontent id="3"] will insert all content from the page with ID = 3.  Only the content is included by default; use [pagecontent id="3" include_title="yes"] if you also want the page title, which is added as an H2 heading with the class 'pagecontent_title'.
+
+Note that a page is only included if the person viewing it would be allowed to read it.  Published pages are included for everyone; drafts, private, scheduled and trashed pages are only included for logged-in users with permission to read them.
 
 = [googlemap address="123 somewhere street, Kansas"] =
 
@@ -60,11 +62,21 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 3.0.2 =
+Security release.  Fixes stored XSS in the [tabs] and [googlemap] shortcodes, and stops [pagecontent] exposing unpublished content.  Recommended for all users.
+
 = 3.0.0 =
 PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admin users only (not editors/contributors).
 
 
 == Changelog ==
+
+= 3.0.2 =
+* Security: fix a stored XSS in the [tabs] shortcode.  Tab content written by users without the `unfiltered_html` capability is now filtered through wp_kses_post() after HTML reconstruction.  Reported via Patchstack.
+* Security: fix a stored XSS in the [googlemap] shortcode.  The class, width, height and zoom attributes were written into the map markup unescaped; they are now escaped and coerced on output.
+* Security: fix content disclosure in the [pagecontent] shortcode.  It would include any post ID regardless of status, exposing draft, pending, private, scheduled, trashed and password-protected content to visitors.  Published posts are included as before; anything else now requires the viewer to have permission to read it.
+* [pagecontent] no longer loops if a page includes itself, and uses get_post() instead of the deprecated get_page().
+* [pagecontent] now actually implements the documented include_title="yes" option, which was being parsed but never used.  The title is added as an H2 with the class 'pagecontent_title'.  The readme previously described this option backwards.
 
 = 3.0.1 =
 * Add security disclosure policy (Patchstack Vulnerability Disclosure Program) link to FAQ

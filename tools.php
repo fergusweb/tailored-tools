@@ -2,7 +2,7 @@
 /*
 Plugin Name:	Tailored Tools
 Description:	Custom contact forms with built-in anti-spam (reCAPTCHA, Akismet), plus shortcodes for Google Maps, tabs, and page includes.
-Version:		3.0.1
+Version:		3.0.2
 Author:			Tailored Media
 Author URI:		http://www.tailoredmedia.com.au
 */
