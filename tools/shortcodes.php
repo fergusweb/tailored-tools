@@ -108,21 +108,50 @@ class TailoredTools_Shortcodes {
 	
 
 	/**
+	 *	Is this post safe to pull into another page for whoever is doing the looking?
+	 *	Published content is fair game.  Anything else (draft, pending, private, future,
+	 *	trash) is only shown to a viewer who could already read it directly, so that
+	 *	dropping in a shortcode can't expose unpublished content to the world.
+	 */
+	function can_include_post($post) {
+		if (!$post || !is_object($post))			return false;
+		if (post_password_required($post))			return false;
+		//	get_post_status() resolves 'inherit' (attachments) to the parent's status
+		if (get_post_status($post) == 'publish')	return true;
+		return current_user_can('read_post', $post->ID);
+	}
+
+
+	/**
 	 *	Shortcode: [pagecontent] to include content from another page
-	 *	Used for templates & includes. Optionally include heading too.
+	 *	Used for templates & includes.  Content only by default; pass include_title="yes"
+	 *	to prepend the page title as a heading.
 	 *	Usage:  [pagecontent id="99" include_title="yes"]
 	 */
 	function shortcode_pagecontent($atts=false) {
+		static $including = array();		// Guard against a page including itself
+
 		$atts = shortcode_atts(array(
 			'id'			=> false,
-			'include_title'	=> (strtoupper(@$atts['include_title'])=='YES') ? true : false,
+			'include_title'	=> false,
 		), $atts);
-		if (!is_numeric($atts['id']))	return '';
-		$page = get_page($atts['id']);
-		if (!$page)						return '';
+		$include_title = (strtoupper((string) $atts['include_title']) == 'YES');
+		if (!is_numeric($atts['id']))			return '';
+
+		$id = absint($atts['id']);
+		if (isset($including[$id]))				return '';
+
+		$page = get_post($id);
+		if (!$this->can_include_post($page))		return '';
+
+		$including[$id] = true;
 		ob_start();
+		if ($include_title)	echo '<h2 class="pagecontent_title">'.esc_html(get_the_title($page)).'</h2>'."\n";
 		echo apply_filters('the_content', $page->post_content);
-		return ob_get_clean();
+		$content = ob_get_clean();
+		unset($including[$id]);
+
+		return $content;
 	}
 	
 
