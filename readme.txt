@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	7.0
 Tested up to:		7.1
-Stable tag:			3.0.2
+Stable tag:			3.0.3
 
 Contains some helper classes to help you build custom forms.
 
@@ -62,6 +62,9 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 3.0.3 =
+Security release.  Fixes an attribute-injection XSS in the form shortcodes, restricts the Embed JS tool to users who may publish unfiltered HTML (this changes who can use it on multisite), and stops non-administrators changing form settings.  Recommended for all users.
+
 = 3.0.2 =
 Security release.  Fixes stored XSS in the [tabs] and [googlemap] shortcodes, and stops [pagecontent] exposing unpublished content.  Recommended for all users.
 
@@ -70,6 +73,14 @@ PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admi
 
 
 == Changelog ==
+
+= 3.0.3 =
+* Security: fix a stored XSS in the form shortcodes.  The `class` attribute (eg, [ContactForm class="highlight"]) was written into the form tag unescaped, so any user who can add a shortcode could break out of the attribute.  Class names are now sanitised and the form tag is escaped on output.  Reported via Patchstack.
+* Security: the Embed JS tool now requires the `unfiltered_html` capability rather than `manage_options`.  The code it stores is printed to the page unescaped, and on multisite a site Administrator has `manage_options` without being trusted with raw HTML.  Embed code is also recorded against the user who saved it and is only printed while that user still holds the capability, and the meta value is now protected so it cannot be set through the Custom Fields box or XML-RPC.
+* Security: the form settings page was available to anyone with `edit_posts`, meaning contributors and authors could change the notification email address and the messages printed on the front end.  Viewing logged enquiries is unchanged; saving and viewing settings now requires `manage_options`, and settings values are escaped when printed in the admin.
+* Security: form error and success messages are filtered with wp_kses_post() before being printed on the front end, and the submitted value echoed back by the email-format check is now escaped as well.
+
+NOTE: embed code saved before this release is no longer printed on multisite, or on any site that defines DISALLOW_UNFILTERED_HTML, until a user who holds `unfiltered_html` (a Super Admin on multisite) opens the page and saves it again.  The Embed JS box shows a warning when this applies.
 
 = 3.0.2 =
 * Security: fix a stored XSS in the [tabs] shortcode.  Tab content written by users without the `unfiltered_html` capability is now filtered through wp_kses_post() after HTML reconstruction.  Reported via Patchstack.

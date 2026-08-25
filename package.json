@@ -1,10 +1,19 @@
 {
   "name": "tailored-tools",
-  "version": "3.0.2",
+  "version": "3.0.3",
   "repository": "https://github.com/fergusweb/tailored-tools",
   "license": "GPL-3.0",
   "main": "build/index.js",
-  "packageManager": "pnpm@11.21.0",
+  "packageManager": "pnpm@11.22.0",
+  "files": [
+    "tools.php",
+    "readme.txt",
+    "includes",
+    "tools",
+    "js",
+    "resource",
+    "assets/*.png"
+  ],
   "scripts": {
     "start": "wp-env start",
     "debug": "wp-env start --xdebug",

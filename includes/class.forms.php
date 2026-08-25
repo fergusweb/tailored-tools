@@ -364,7 +364,9 @@ abstract class TailoredForm {
 			break;
 			default:
 				if (!isset($_POST[$key]) || (!is_array($_POST[$key]) && trim($_POST[$key])==''))	$this->error[] = $q['error'];
-				if ($q['type']=='email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.$_POST[$key].'</em> does not look like an email address';
+				//	This is printed through wp_kses_post() at the sink, but escape here too so the
+				//	submitted value can never be anything other than inert text inside the <em>.
+				if ($q['type']=='email' && !empty($_POST[$key]) && !is_email($_POST[$key]))	$this->error[] = '<em>'.esc_html($_POST[$key]).'</em> does not look like an email address';
 			break;
 		}
 		
@@ -417,11 +419,32 @@ abstract class TailoredForm {
 		$atts = shortcode_atts(array(
 			'class'	=> '',
 		), $atts);
-		if (!empty($atts['class']))	$this->form_class .= ' '.$atts['class'];
+		//	Shortcode attributes are plain text, so kses never inspects them at save time.
+		//	Reduce to valid class names here, or a quote in the attribute breaks out of the tag.
+		$extra_class = $this->sanitize_class_list($atts['class']);
+		//	Apply for this render only.  One instance handles every use of the shortcode,
+		//	so appending permanently would leak classes into later forms on the page.
+		$orig_class = $this->form_class;
+		if ($extra_class)	$this->form_class = trim($this->form_class.' '.$extra_class);
 		// Now buffer then output form HTML
 		ob_start();
 		$this->html();
+		$this->form_class = $orig_class;
 		return ob_get_clean();
+	}
+
+
+	/**
+	 *	Reduce a space-separated list of class names to those that are safe to print.
+	 */
+	function sanitize_class_list($classes) {
+		if (!is_string($classes) || trim($classes) === '')	return '';
+		$safe = array();
+		foreach (preg_split('/[\s]+/', trim($classes)) as $class) {
+			$class = sanitize_html_class($class);
+			if ($class !== '')	$safe[] = $class;
+		}
+		return implode(' ', $safe);
 	}
 	
 	
@@ -432,8 +455,10 @@ abstract class TailoredForm {
 	function form_html() {	$this->html(); }
 	function html() {
 		// Form Feedback
-		if (!empty($this->error))	echo '<p class="error"><strong>Errors:</strong><br /> &bull; '.implode("<br /> &bull; ",$this->error)."</p>\n";
-		if (!empty($this->success))	echo '<p class="success">'.implode("<br />",$this->success)."</p>\n";
+		//	Messages come from settings and question definitions.  Formatting is allowed, but
+		//	filter them so nothing here can become a script tag on a visitor's page.
+		if (!empty($this->error))	echo '<p class="error"><strong>Errors:</strong><br /> &bull; '.wp_kses_post(implode("<br /> &bull; ",$this->error))."</p>\n";
+		if (!empty($this->success))	echo '<p class="success">'.wp_kses_post(implode("<br />",$this->success))."</p>\n";
 		// Set encoding type
 		foreach ($this->questions as $q) {
 			if ($q['type'] == 'file')		$this->form_enctype = 'multipart/form-data';
@@ -441,7 +466,7 @@ abstract class TailoredForm {
 		$enctype = (!$this->form_enctype) ? '' : ' enctype="'.$this->form_enctype.'"';
 		// Draw form
 		do_action('ttools_form_before_form', $this);
-		echo '<form action="'.$this->form_action.'" method="post" class="tws '.$this->form_class.'"'.$enctype.'>'."\n";
+		echo '<form action="'.esc_url($this->form_action).'" method="post" class="'.esc_attr(trim('tws '.$this->form_class)).'"'.$enctype.'>'."\n";
 		do_action('ttools_form_before_questions', $this);
 		foreach ($this->questions as $key => $q) {
 			
@@ -748,9 +773,13 @@ abstract class TailoredForm {
 	
 	function admin_page() {
 		echo '<div class="wrap">'."\n";
-		echo '<h2>'.$this->form_name.'</h2>'."\n";
+		echo '<h2>'.esc_html($this->form_name).'</h2>'."\n";
 		// Save Settings
 		if (isset($_POST['SaveSettings'])) {
+			//	The page itself is open to anyone who can edit posts, so that authors can read
+			//	their enquiries.  Changing where mail goes, or what HTML the front end prints,
+			//	is an administrator job.
+			if (!current_user_can('manage_options')) {	echo '<div class="error"><p>You are not permitted to change these settings.</p></div>'."\n"; return; }
 			if (!wp_verify_nonce($_POST['_wpnonce'] ?? '', $this->nonce)) {	echo '<div class="updated"><p>Invalid security.</p></div>'."\n"; return; }
 			$_POST = stripslashes_deep($_POST);
 			//echo '<pre>'; print_r($_POST); echo '</pre>';
@@ -795,6 +824,7 @@ abstract class TailoredForm {
 		// Show & Save logged submissions
 		if ($this->log_type)	$this->admin_list_logs();
 		// Settings Form
+		if (!current_user_can('manage_options')) {	echo '</div><!-- wrap -->'."\n"; return; }
 		?>
         <div class="widefat postbox" style="margin:1em 0 2em;">
         <h3 class="hndle" style="padding:0.5em; cursor:default;">Settings</h3>
@@ -806,26 +836,26 @@ abstract class TailoredForm {
 		  <legend>Email Options</legend>
 		  	<p><label>
 				<span>Email notifications to:</span>
-				<input type="text" name="email[to]" class="widefat" value="<?php echo $this->opts['email']['to']; ?>" />
+				<input type="text" name="email[to]" class="widefat" value="<?php echo esc_attr($this->opts['email']['to']); ?>" />
 			</label></p>
 			<p><label>
 				<span>BCC notifications to:</span>
-				<input type="text" name="email[bcc]" class="widefat" value="<?php echo $this->opts['email']['bcc']; ?>" />
+				<input type="text" name="email[bcc]" class="widefat" value="<?php echo esc_attr($this->opts['email']['bcc']); ?>" />
 			</label></p>
 			<p><label>
 				<span>Email Subject Line:</span>
-				<input type="text" name="email[subject]" class="widefat" value="<?php echo $this->opts['email']['subject']; ?>" />
+				<input type="text" name="email[subject]" class="widefat" value="<?php echo esc_attr($this->opts['email']['subject']); ?>" />
 			</label></p>
 		  	<p><label>
 				<span>Sending email from:</span>
-				<input type="text" name="email[from]" class="widefat" value="<?php echo $this->opts['email']['from']; ?>" />
+				<input type="text" name="email[from]" class="widefat" value="<?php echo esc_attr($this->opts['email']['from']); ?>" />
 			</label></p>
 		</fieldset>
 		<fieldset>
 		  <legend>Response Options</legend>
 			<p><label>
 				<span>Thank-you URL:</span>
-				<input name="success[url]" type="text" class="widefat" value="<?php echo $this->opts['success']['redirect']; ?>" />
+				<input name="success[url]" type="text" class="widefat" value="<?php echo esc_attr($this->opts['success']['redirect']); ?>" />
 			</label></p>
 			<p class="note">
 				If you leave the "Thank-you URL" blank, the "Thank-you Message" will be shown instead.<br />
@@ -833,11 +863,11 @@ abstract class TailoredForm {
 			</p>
 			<p><label>
 				<span>Thank-you Message:</span>
-				<textarea name="success[msg]" class="widefat"><?php echo $this->opts['success']['message']; ?></textarea>
+				<textarea name="success[msg]" class="widefat"><?php echo esc_textarea($this->opts['success']['message']); ?></textarea>
 			</label></p>
 			<p><label>
 				<span>Error Message:</span>
-				<textarea name="failure[msg]" class="widefat"><?php echo $this->opts['failure']['message']; ?></textarea>
+				<textarea name="failure[msg]" class="widefat"><?php echo esc_textarea($this->opts['failure']['message']); ?></textarea>
 			</label></p>
 		</fieldset>
 		</div><!-- left column -->
@@ -859,9 +889,9 @@ abstract class TailoredForm {
 				<a href="https://www.google.com/recaptcha/admin" target="_blank">Get API Keys</a>
 			</p>
 			<p><label><span>Public Key:</span>
-				<input name="recaptcha[public]" type="text" value="<?php echo $this->opts['recaptcha']['public']; ?>" /></label></p>
+				<input name="recaptcha[public]" type="text" value="<?php echo esc_attr($this->opts['recaptcha']['public']); ?>" /></label></p>
 			<p><label><span>Private Key:</span>
-				<input name="recaptcha[private]" type="text" value="<?php echo $this->opts['recaptcha']['private']; ?>" /></label></p>
+				<input name="recaptcha[private]" type="text" value="<?php echo esc_attr($this->opts['recaptcha']['private']); ?>" /></label></p>
 		</fieldset>
 		<?php	}								?>
 		
@@ -881,7 +911,7 @@ abstract class TailoredForm {
 			</p>
 			<p><label>
 				<span>Public Key:</span>
-				<input name="akismet[api_key]" type="text" value="<?php echo $this->opts['akismet']['api_key']; ?>" />
+				<input name="akismet[api_key]" type="text" value="<?php echo esc_attr($this->opts['akismet']['api_key']); ?>" />
 			</label></p>
 		</fieldset>
 		<?php	}								?>
