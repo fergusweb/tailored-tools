@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	7.0
 Tested up to:		7.1
-Stable tag:			3.0.4
+Stable tag:			3.0.5
 
 Contains some helper classes to help you build custom forms.
 
@@ -62,6 +62,9 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 3.0.5 =
+Security release.  Fixes a CSRF in the form log screen that could be used to delete any post on the site.  Deleting logs now requires the Editor role.  Recommended for all users.
+
 = 3.0.4 =
 Security release.  Fixes unrestricted file upload in forms that use a 'file' question.  Recommended for all users.
 
@@ -76,6 +79,11 @@ PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admi
 
 
 == Changelog ==
+
+= 3.0.5 =
+* Security: fix a CSRF in the form log screen.  The bulk Delete action did not check a nonce or the type of post being deleted, so a forged request opened by any logged-in user who could see the logs (Contributor and up) could permanently delete any post, page or attachment on the site.  Deletes now require a valid nonce, and only logs belonging to that form can be deleted.  Reported via Patchstack.
+* Deleting logs now requires the `edit_others_posts` capability (Editor and up).  Contributors and Authors can still view logs, but no longer see the Delete action.  Use the `ttools_form_delete_logs_cap` filter to change the capability.
+* Fix a fatal error on the form log screen when per_page was 0 or negative.  per_page is now limited to 1-200.
 
 = 3.0.4 =
 * Security: fix unrestricted file upload in form 'file' questions.  Uploads were saved to the public uploads folder using the visitor's own filename, with no check on file type, so any file (including PHP) could be placed on the server until the notification email had been sent, and existing files with the same name could be overwritten.  Uploads now go through wp_handle_upload(), which sanitises the filename, makes it unique and checks the real file type.  Reported via Patchstack.

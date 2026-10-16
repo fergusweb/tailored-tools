@@ -1198,7 +1198,7 @@ function drawChart() {
 	function admin_list_logs() {
 		if (!$this->log_type || !class_exists('tws_form_log_Table'))	return false;
 		
-		$per_page = (isset($_GET['per_page']) && is_numeric($_GET['per_page'])) ? $_GET['per_page'] : '20';
+		$per_page = (isset($_GET['per_page'])) ? min(max(absint($_GET['per_page']), 1), 200) : 20;
 		$table = new tws_form_log_Table();
 		$table->prepare_items($this->log_type, $per_page);
 		?>
@@ -1329,6 +1329,7 @@ if (is_admin() || !class_exists('tws_WP_List_Table')) {
 if (is_admin() || !class_exists('tws_WP_List_Table')) {
 	
 	class tws_form_log_Table extends tws_WP_List_Table {
+		protected	$log_post_type	= '';		// Set by prepare_items().  Only posts of this type may be deleted.
 	
 		function get_columns() {
 			return array(
@@ -1340,28 +1341,56 @@ if (is_admin() || !class_exists('tws_WP_List_Table')) {
 			);
 		}
 		
+		/**
+		 *	Viewing logs only needs edit_posts (the admin page), but deleting them is an editor job.
+		 *	Log post types aren't registered, so per-post meta caps like delete_post aren't reliable here.
+		 */
+		function can_delete_logs() {
+			$cap = apply_filters('ttools_form_delete_logs_cap', 'edit_others_posts', $this->log_post_type);
+			return current_user_can($cap);
+		}
+
 		function get_bulk_actions() {
+			if (!$this->can_delete_logs())	return array();
 			return array(
 				'delete'    => 'Delete'
 			);
-		} 
-		
+		}
+
 		function process_bulk_action() {
-			if ('delete' === $this->current_action()) {
-				foreach ($_POST['records'] as $delete_id) {
-					wp_delete_post($delete_id, true);
-				}
-				echo '<div class="updated"><p>Selected logs have been deleted.</p></div>'."\n";
+			if ('delete' !== $this->current_action())	return;
+			$post_type = $this->log_post_type;
+			if (!$post_type || !$this->can_delete_logs()) {
+				echo '<div class="error"><p>You are not permitted to delete these logs.</p></div>'."\n";
+				return;
 			}
-		} 
-		
+			// Nonce is printed by display_tablenav()
+			if (!wp_verify_nonce($_POST['_wpnonce'] ?? '', 'bulk-'.$this->_args['plural'])) {
+				echo '<div class="error"><p>Invalid security.</p></div>'."\n";
+				return;
+			}
+			$records = (isset($_POST['records']) && is_array($_POST['records'])) ? array_map('absint', $_POST['records']) : array();
+			$deleted = 0;
+			foreach (array_unique($records) as $delete_id) {
+				// Only ever delete logs belonging to this form
+				$post = ($delete_id) ? get_post($delete_id) : null;
+				if (!$post || $post->post_type !== $post_type)	continue;
+				if (wp_delete_post($post->ID, true))	$deleted++;
+			}
+			if ($deleted)	echo '<div class="updated"><p>Selected logs have been deleted.</p></div>'."\n";
+		}
+
 		function prepare_items( $post_type='', $per_page=20 ) {
+			$this->log_post_type = $post_type;
+			$per_page = min(max(absint($per_page), 1), 200);
 			$columns = $this->get_columns();
+			// No checkboxes if they can't delete
+			if (!$this->can_delete_logs())	unset($columns['cb']);
 			$hidden = array();
-			$sortable = $this->get_sortable_columns(); 
-			$this->_column_headers = array($columns, $hidden, $sortable); 
-			
-			$this->process_bulk_action(); 
+			$sortable = $this->get_sortable_columns();
+			$this->_column_headers = array($columns, $hidden, $sortable);
+
+			$this->process_bulk_action();
 			
 			$posts = get_posts(array(
 				'numberposts'	=> -1,
