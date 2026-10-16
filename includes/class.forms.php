@@ -1392,21 +1392,43 @@ if (is_admin() || !class_exists('tws_WP_List_Table')) {
 
 			$this->process_bulk_action();
 			
-			$posts = get_posts(array(
-				'numberposts'	=> -1,
-				'post_type'		=> $post_type, //$this->post_type,
-				'post_status'	=> 'all',
-			));
+			$this->items = array();
+			if (!$post_type)	return;
 			
-			$current_page = $this->get_pagenum(); 
-			$total_items = count($posts); 
-			
-			$this->items = array_slice($posts,(($current_page-1)*$per_page),$per_page);
+			// Let the database do the paging, so we only load the logs shown on this page
+			$current_page = $this->get_pagenum();
+			$query = $this->query_logs($post_type, $per_page, $current_page);
+			$total_items = (int) $query->found_posts;
+			$total_pages = (int) ceil($total_items / $per_page);
+			// Asked for a page past the end (eg, after deleting logs) - show the last page instead
+			if ($total_pages && $current_page > $total_pages) {
+				$current_page = $total_pages;
+				$query = $this->query_logs($post_type, $per_page, $current_page);
+			}
+			$this->items = $query->posts;
 			
 			$this->set_pagination_args(array(
-				'total_items' => $total_items,                  //WE have to calculate the total number of items
-				'per_page'    => $per_page,                     //WE have to determine how many items to show on a page
-				'total_pages' => ceil($total_items/$per_page)   //WE have to calculate the total number of pages
+				'total_items' => $total_items,
+				'per_page'    => $per_page,
+				'total_pages' => $total_pages,
+			));
+		}
+		
+		/**
+		 *	One page of logs, newest first.  'all' isn't a real status, so this includes every status (logs are saved as private).
+		 */
+		function query_logs($post_type, $per_page, $page) {
+			return new WP_Query(array(
+				'post_type'					=> $post_type,
+				'post_status'				=> 'all',
+				'posts_per_page'			=> $per_page,
+				'paged'						=> $page,
+				'orderby'					=> 'date',
+				'order'						=> 'DESC',
+				'ignore_sticky_posts'		=> true,
+				'suppress_filters'			=> true,
+				'update_post_meta_cache'	=> false,
+				'update_post_term_cache'	=> false,
 			));
 		}
 		
