@@ -23,7 +23,7 @@
     "lint:css": "wp-scripts lint-style",
     "lint:js": "wp-scripts lint-js",
     "packages-update": "wp-scripts packages-update",
-    "plugin-zip": "wp-scripts plugin-zip",
+    "plugin-zip": "wp-scripts plugin-zip && zip -d tailored-tools.zip package.json README.md",
     "watch": "wp-scripts start --webpack-copy-php"
   },
   "devDependencies": {
