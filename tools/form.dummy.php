@@ -208,6 +208,8 @@ class DummyForm extends TailoredForm {
 				'type'		=> 'file',
 //				'required'	=> true,
 //				'error'		=> 'Please upload a file',
+//				'mimes'		=> array( 'pdf' => 'application/pdf' ),
+//				'max_size'	=> 2 * MB_IN_BYTES,
 			),
 		);
 	}

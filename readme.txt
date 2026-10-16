@@ -3,7 +3,7 @@ Contributors:		tailoredweb, ajferg
 Tags:				
 Requires at least:	7.0
 Tested up to:		7.1
-Stable tag:			3.0.3
+Stable tag:			3.0.4
 
 Contains some helper classes to help you build custom forms.
 
@@ -62,6 +62,9 @@ To embed a Google Map iframe, use this shortcode.  Google will geocode your addr
 
 == Upgrade Notice ==
 
+= 3.0.4 =
+Security release.  Fixes unrestricted file upload in forms that use a 'file' question.  Recommended for all users.
+
 = 3.0.3 =
 Security release.  Fixes an attribute-injection XSS in the form shortcodes, restricts the Embed JS tool to users who may publish unfiltered HTML (this changes who can use it on multisite), and stops non-administrators changing form settings.  Recommended for all users.
 
@@ -73,6 +76,15 @@ PHP8 compatibility, fix various bugs & issues.  The EmbedJS tool is now for admi
 
 
 == Changelog ==
+
+= 3.0.4 =
+* Security: fix unrestricted file upload in form 'file' questions.  Uploads were saved to the public uploads folder using the visitor's own filename, with no check on file type, so any file (including PHP) could be placed on the server until the notification email had been sent, and existing files with the same name could be overwritten.  Uploads now go through wp_handle_upload(), which sanitises the filename, makes it unique and checks the real file type.  Reported via Patchstack.
+* Uploads are only accepted from an allowed list of types: by default images (jpg, png, gif, webp), PDF, Word, Excel, txt and csv.  Set 'mimes' on a question, or use the `ttools_form_upload_mimes` filter, to change it.  PHP, HTML, SVG, JS and other executable types are always refused, as is anything WordPress itself would not let the visitor upload.
+* Uploads are limited to 5MB by default.  Set 'max_size' (in bytes) on a question, or use the `ttools_form_upload_max_size` filter.
+* Uploads are held in a private folder (uploads/ttools-tmp/, blocked by .htaccess, with a random sub-folder per submission) and deleted as soon as the email is sent, or if the submission fails.  Anything left behind by an interrupted request is removed after an hour.
+* Upload problems (wrong type, too large, upload errors) are now reported to the visitor for optional file questions too, not just required ones.
+* The file input now has an `accept` attribute listing the allowed types.
+* Fix an infinite loop when a form contains a fieldset with no questions.
 
 = 3.0.3 =
 * Security: fix a stored XSS in the form shortcodes.  The `class` attribute (eg, [ContactForm class="highlight"]) was written into the form tag unescaped, so any user who can add a shortcode could break out of the attribute.  Class names are now sanitised and the form tag is escaped on output.  Reported via Patchstack.

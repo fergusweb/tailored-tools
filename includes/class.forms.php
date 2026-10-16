@@ -31,8 +31,9 @@ abstract class TailoredForm {
 	public		$submit_label	= 'Submit Form';
 	// Set up at runtime - declared here to avoid PHP 8.2 "dynamic property" deprecations
 	public		$opts			= array();
-	public		$files			= array();
+	public		$files			= array();			// Uploaded files to attach to the email
 	public		$was_mail_sent	= false;
+	protected	$upload_token	= false;			// Per-request temp folder for uploads
 
 	
 	/**
@@ -183,36 +184,193 @@ abstract class TailoredForm {
 	
 	/**
 	 *	Process upload & prepare attachments
-	 *	Original function doesn't work for file questions inside fieldsets.  This one is recursive.
+	 *	Recursive, so file questions inside fieldsets are handled too.
+	 *	Uploads only live long enough to be attached to the notification email - see delete_uploads().
 	 */
 	function process_upload($questions=false) {
-		if (!$questions) {
-			return $this->process_upload( $this->questions );
-		}
-		$dir = wp_upload_dir();
+		if ($questions === false)	$questions = $this->questions;
+		if (!is_array($questions))	return;
 		foreach ($questions as $key => $q) {
-			if ($q['type'] == 'fieldset')	$this->process_upload( $questions[$key]['questions'] );
+			if ($q['type'] == 'fieldset') {
+				if (!empty($q['questions']))	$this->process_upload( $q['questions'] );
+				continue;
+			}
 			if ($q['type'] != 'file')		continue;
-			if (!isset($_FILES[$key]))		continue;
-			$upload = $dir['basedir'].'/'.$_FILES[$key]['name'];
-			if (!move_uploaded_file($_FILES[$key]['tmp_name'], $upload))	continue;
-			$this->files[] = $upload;
+			$this->handle_file_upload($key, $q);
 		}
 	}
 
 	/**
-	 *	Process upload & prepare attachments
-	 *
-	function process_upload() {
-		$dir = wp_upload_dir();
-		foreach ($this->questions as $key => $q) {
-			if ($q['type'] != 'file')		continue;
-			$upload = $dir['basedir'].'/'.$_FILES[$key]['name'];
-			if (!move_uploaded_file($_FILES[$key]['tmp_name'], $upload))	continue;
-			$this->files[] = $upload;
+	 *	Store a single uploaded file via wp_handle_upload(), which sanitises the name, makes it unique,
+	 *	and checks the real file type against our allowed list.
+	 */
+	function handle_file_upload($key, $q) {
+		if (!isset($_FILES[$key]['error']) || $_FILES[$key]['error'] === UPLOAD_ERR_NO_FILE)	return;
+		if ($error = $this->check_file_upload($key, $q)) {
+			$this->error[] = $error;
+			return;
+		}
+		if (!function_exists('wp_handle_upload'))	require_once ABSPATH.'wp-admin/includes/file.php';
+		if (!$this->prepare_upload_dir()) {
+			$this->error[] = 'Sorry, your file could not be uploaded.';
+			return;
+		}
+		add_filter('upload_dir', array($this, 'filter_upload_dir'));
+		$result = wp_handle_upload($_FILES[$key], array(
+			'test_form'	=> false,
+			'test_size'	=> true,
+			'test_type'	=> true,
+			'mimes'		=> $this->get_upload_mimes($key, $q),
+		));
+		remove_filter('upload_dir', array($this, 'filter_upload_dir'));
+		// Don't echo $result['error'] - some messages contain server paths.
+		if (!empty($result['error']) || empty($result['file'])) {
+			$this->error[] = 'Sorry, your file could not be uploaded.';
+			return;
+		}
+		$this->files[] = $result['file'];
+	}
+
+	/**
+	 *	Check an uploaded file against this question's rules.
+	 *	Returns an error message, or false if the file is acceptable (or no file was sent).
+	 */
+	function check_file_upload($key, $q) {
+		if (!isset($_FILES[$key]))	return false;
+		$file = $_FILES[$key];
+		// We only support one file per question.  An array here means name="key[]" was posted.
+		if (!is_array($file) || !isset($file['error'], $file['name'], $file['tmp_name'], $file['size']) || is_array($file['error'])) {
+			return 'Invalid file upload';
+		}
+		if ($file['error'] === UPLOAD_ERR_NO_FILE)	return false;
+		$max = $this->get_upload_max_size($key, $q);
+		if ($file['error'] === UPLOAD_ERR_INI_SIZE || $file['error'] === UPLOAD_ERR_FORM_SIZE || $file['size'] > $max) {
+			return 'Your file is too large.  The maximum size is '.esc_html(size_format($max)).'.';
+		}
+		if ($file['error'] !== UPLOAD_ERR_OK || !is_uploaded_file($file['tmp_name'])) {
+			return 'There was a problem uploading your file, please try again.';
+		}
+		$check = wp_check_filetype_and_ext($file['tmp_name'], $file['name'], $this->get_upload_mimes($key, $q));
+		if (empty($check['ext']) || empty($check['type'])) {
+			return 'That type of file is not allowed.  Allowed types: '.esc_html(implode(', ', $this->get_upload_extensions($key, $q))).'.';
+		}
+		return false;
+	}
+
+	/**
+	 *	Allowed file types for a file question, in the same format as get_allowed_mime_types().
+	 *	Set 'mimes' on the question, or use the 'ttools_form_upload_mimes' filter, to change them.
+	 *	Anything WordPress wouldn't let this visitor upload, or that could be executed or rendered by the browser, is always removed.
+	 */
+	function get_upload_mimes($key, $q) {
+		$mimes = array(
+			'jpg|jpeg|jpe'	=> 'image/jpeg',
+			'png'			=> 'image/png',
+			'gif'			=> 'image/gif',
+			'webp'			=> 'image/webp',
+			'pdf'			=> 'application/pdf',
+			'doc'			=> 'application/msword',
+			'docx'			=> 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+			'xls'			=> 'application/vnd.ms-excel',
+			'xlsx'			=> 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+			'txt'			=> 'text/plain',
+			'csv'			=> 'text/csv',
+		);
+		if (!empty($q['mimes']) && is_array($q['mimes']))	$mimes = $q['mimes'];
+		$mimes = apply_filters('ttools_form_upload_mimes', $mimes, $key, $q, $this);
+		if (!is_array($mimes))	return array();
+
+		$wp_exts = array();
+		foreach (array_keys(get_allowed_mime_types()) as $exts) {
+			$wp_exts = array_merge($wp_exts, explode('|', strtolower($exts)));
+		}
+		$never = array('php','php3','php4','php5','php7','php8','phtml','pht','phar','phps','shtml','htm','html','xhtml','svg','svgz','js','mjs','htaccess','exe','sh','cgi','pl','py','asp','aspx','jsp');
+		foreach ($mimes as $exts => $type) {
+			foreach (explode('|', strtolower($exts)) as $ext) {
+				if (!in_array($ext, $wp_exts, true) || in_array($ext, $never, true)) {
+					unset($mimes[$exts]);
+					break;
+				}
+			}
+		}
+		return $mimes;
+	}
+
+	function get_upload_extensions($key, $q) {
+		$exts = array();
+		foreach (array_keys($this->get_upload_mimes($key, $q)) as $group) {
+			$exts = array_merge($exts, explode('|', $group));
+		}
+		return $exts;
+	}
+
+	/**
+	 *	Maximum file size in bytes.  Set 'max_size' on the question, or use the 'ttools_form_upload_max_size' filter.
+	 */
+	function get_upload_max_size($key, $q) {
+		$max = (!empty($q['max_size'])) ? absint($q['max_size']) : 5 * MB_IN_BYTES;
+		$max = (int) apply_filters('ttools_form_upload_max_size', $max, $key, $q, $this);
+		return min($max, wp_max_upload_size());
+	}
+
+	/**
+	 *	Uploads are kept in uploads/ttools-tmp/<random>/ rather than the public uploads folder.
+	 *	The parent folder blocks web access, and each request gets its own unguessable sub-folder.
+	 */
+	function get_upload_tmp_base() {
+		$dir = wp_upload_dir(null, false);
+		return trailingslashit($dir['basedir']).'ttools-tmp';
+	}
+
+	function prepare_upload_dir() {
+		$base = $this->get_upload_tmp_base();
+		if (!wp_mkdir_p($base))		return false;
+		if (!file_exists($base.'/index.php'))	@file_put_contents($base.'/index.php', "<?php\n// Silence is golden.\n");
+		if (!file_exists($base.'/.htaccess'))	@file_put_contents($base.'/.htaccess', "<IfModule mod_authz_core.c>\n\tRequire all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n\tDeny from all\n</IfModule>\n");
+		if (!$this->upload_token) {
+			$this->upload_token = wp_generate_password(24, false);
+			$this->cleanup_stale_uploads();
+		}
+		return true;
+	}
+
+	function filter_upload_dir($dirs) {
+		$sub = '/ttools-tmp/'.$this->upload_token;
+		$dirs['subdir']	= $sub;
+		$dirs['path']	= $dirs['basedir'].$sub;
+		$dirs['url']	= $dirs['baseurl'].$sub;
+		return $dirs;
+	}
+
+	/**
+	 *	Delete this request's uploads once they've been emailed (or the submission failed)
+	 */
+	function delete_uploads() {
+		$base = $this->get_upload_tmp_base();
+		foreach ($this->files as $file) {
+			// Only ever delete files inside our own temp folder.
+			if (strpos(wp_normalize_path($file), wp_normalize_path($base).'/') !== 0)	continue;
+			if (file_exists($file))		wp_delete_file($file);
+		}
+		$this->files = array();
+		if ($this->upload_token && is_dir($base.'/'.$this->upload_token))	@rmdir($base.'/'.$this->upload_token);
+	}
+
+	/**
+	 *	Remove anything left behind by a request that died before delete_uploads() ran
+	 */
+	function cleanup_stale_uploads() {
+		$dirs = glob($this->get_upload_tmp_base().'/*', GLOB_ONLYDIR);
+		if (empty($dirs))	return;
+		foreach ($dirs as $dir) {
+			if (filemtime($dir) > time() - HOUR_IN_SECONDS)	continue;
+			foreach ((array) scandir($dir) as $file) {
+				if (is_file($dir.'/'.$file))	wp_delete_file($dir.'/'.$file);
+			}
+			@rmdir($dir);
 		}
 	}
-	
+
 	/**
 	 *	Build message string from $questions array
 	 */
@@ -259,6 +417,10 @@ abstract class TailoredForm {
 		if (!$this->validate_form())	return;
 		// Handle file uploads
 		if (!empty($_FILES))			$this->process_upload();
+		if (!empty($this->error)) {
+			$this->delete_uploads();
+			return;
+		}
 
 		// Prepare form data array
 		$formdata = $this->process_form_prepare_data();
@@ -275,7 +437,7 @@ abstract class TailoredForm {
 			echo '<pre>Form Data - '; print_r($formdata); echo '</pre>';
 			echo '<p>Headers:<br />'; foreach($headers as $h) echo htmlentities($h).'<br>'; echo '</p>';
 			echo '<p>---Message---<br />'.nl2br($message).'</p>'."\n";
-			if (!empty($this->files))	echo '<p>Attachments:<br> - '.implode('<br> - ',$this->files).'</p>';
+			if (!empty($this->files))	echo '<p>Attachments:<br> - '.implode('<br> - ', array_map('esc_html', $this->files)).'</p>';
 		}
 		
 		// Log Data
@@ -283,9 +445,7 @@ abstract class TailoredForm {
 		// Send email
 		$this->was_mail_sent = wp_mail($this->opts['email']['to'], $this->opts['email']['subject'], $message, $headers, $this->files);
 		// Delete any uploaded attachments
-		foreach ($this->files as $file) {
-			unlink($file);
-		}
+		$this->delete_uploads();
 		// Handle redirection or response
 		$this->redirect_or_response();
 	}
@@ -342,6 +502,8 @@ abstract class TailoredForm {
 	}
 	
 	function validate_question($key, $q) {
+		// Uploads are checked whether or not they're required
+		if ($q['type'] == 'file' && ($file_error = $this->check_file_upload($key, $q)))	$this->error[] = $file_error;
 		if (empty($q['required']))	return;
 		
 		switch ($q['type']) {
@@ -360,7 +522,8 @@ abstract class TailoredForm {
 				}
 			break;
 			case 'file':
-				if (!isset($_FILES[$key]) || $_FILES[$key]['error'] != '0')	$this->error[] = $q['error'];
+				// Problems with a file that was sent are reported by check_file_upload() above
+				if (!isset($_FILES[$key]['error']) || $_FILES[$key]['error'] === UPLOAD_ERR_NO_FILE)	$this->error[] = $q['error'];
 			break;
 			default:
 				if (!isset($_POST[$key]) || (!is_array($_POST[$key]) && trim($_POST[$key])==''))	$this->error[] = $q['error'];
@@ -610,7 +773,8 @@ abstract class TailoredForm {
 	
 	function draw_fileupload($key, $q) {
 		echo '<p'.$q['class'].'><label><span>'.$q['label'].'</span>'."\n";
-		echo "\t".'<input type="'.$q['type'].'" name="'.$key.'" id="'.$key.'" /></label></p>'."\n";
+		$accept = '.'.implode(',.', $this->get_upload_extensions($key, $q));
+		echo "\t".'<input type="file" name="'.esc_attr($key).'" id="'.esc_attr($key).'" accept="'.esc_attr($accept).'" /></label></p>'."\n";
 	}
 	
 	function draw_datepicker($key, $q) {

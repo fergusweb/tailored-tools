@@ -166,6 +166,10 @@ class SampleForm extends TailoredForm {
 				'type'		=> 'file',
 				'required'	=> true,
 				'error'		=> 'Please upload a file',
+				// Optional.  Defaults to images, PDF, Word, Excel, txt & csv, up to 5MB.
+				// Executable and HTML-like types are always refused, even if listed here.
+//				'mimes'		=> array( 'pdf' => 'application/pdf', 'jpg|jpeg|jpe' => 'image/jpeg' ),
+//				'max_size'	=> 2 * MB_IN_BYTES,
 			),
 		);
 	}
