@@ -4,6 +4,8 @@ Tags:
 Requires at least:	7.0
 Tested up to:		7.1
 Stable tag:			3.0.5
+License:			GPLv2 or later
+License URI:		https://www.gnu.org/licenses/gpl-2.0.html
 
 Contains some helper classes to help you build custom forms.
 

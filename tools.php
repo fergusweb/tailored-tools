@@ -5,6 +5,8 @@ Description:	Custom contact forms with built-in anti-spam (reCAPTCHA, Akismet), 
 Version:		3.0.5
 Author:			Tailored Media
 Author URI:		http://www.tailoredmedia.com.au
+License:		GPLv2 or later
+License URI:	https://www.gnu.org/licenses/gpl-2.0.html
 */
 
 

@@ -2,7 +2,7 @@
   "name": "tailored-tools",
   "version": "3.0.5",
   "repository": "https://github.com/fergusweb/tailored-tools",
-  "license": "GPL-3.0",
+  "license": "GPL-2.0-or-later",
   "main": "build/index.js",
   "packageManager": "pnpm@12.11.2",
   "files": [
